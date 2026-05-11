@@ -1,0 +1,2384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LAB 1.1 / Purple Team Engagement Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f1e6; --paper-2:#ece7d8; --surface:#ffffff;
+  --ink:#0f1419; --ink-2:#2a2f3a; --muted:#7a7461; --muted-2:#aca48d;
+  --rule:#cbc2a8; --rule-soft:#e2dcc7;
+  --purple:#5b2c87; --purple-2:#7a3fb1; --purple-soft:#ece4f5;
+  --red:#c8102e; --red-soft:#fbe5e8;
+  --green:#2e7d32; --green-soft:#e1f0e2;
+  --amber:#b07410; --amber-soft:#f9eed5;
+  --display:'Bricolage Grotesque',sans-serif;
+  --serif:'Newsreader',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--paper);color:var(--ink);font-family:var(--display);
+  font-weight:400;font-size:14px;line-height:1.55;letter-spacing:-.005em;
+  -webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(var(--rule-soft) 1px,transparent 1px),
+    linear-gradient(90deg,var(--rule-soft) 1px,transparent 1px);
+  background-size:48px 48px;opacity:.55;pointer-events:none;z-index:0;
+  -webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 90%);
+          mask-image:radial-gradient(ellipse at center,black 30%,transparent 90%);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .12 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode:multiply;opacity:.5;
+}
+.app{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
+
+/* HEADER */
+header.bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:18px 32px 14px;border-bottom:2px solid var(--ink);background:var(--paper);position:relative}
+header.bar::after{content:'';position:absolute;left:32px;right:32px;bottom:-7px;height:1px;background:var(--ink)}
+.crest{display:flex;align-items:center;gap:14px}
+.crest-mark{width:46px;height:46px;display:block;flex-shrink:0;filter:drop-shadow(0 1px 0 rgba(15,20,25,.05))}
+.crest-id{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;font-weight:500}
+.crest-title{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.015em;color:var(--ink)}
+.classif{font-family:var(--mono);font-size:9px;color:var(--red);letter-spacing:.2em;text-transform:uppercase;font-weight:700;border:1px solid var(--red);padding:2px 6px;display:inline-block;margin-top:4px}
+
+.path{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+.path .crumb{display:flex;align-items:center;gap:6px}
+.path .step{display:inline-flex;width:24px;height:24px;border:1px solid var(--rule);align-items:center;justify-content:center;color:var(--muted-2);font-weight:500;position:relative}
+.path .step svg{width:13px;height:13px;display:block;color:inherit}
+.path .step.now svg{color:var(--paper)}
+.path .step.done svg{display:none}
+.path .step.done{color:var(--green);border-color:var(--green)}
+.path .step.now{color:var(--paper);border-color:var(--purple);background:var(--purple);font-weight:700}
+.path .lbl-dim{color:var(--muted-2)}
+
+.gauge-wrap{display:flex;align-items:center;gap:18px;justify-content:flex-end}
+.gauge{width:200px}
+.gauge-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between;margin-bottom:6px;align-items:center;font-weight:500}
+.help{display:inline-grid;place-items:center;width:14px;height:14px;border:1px solid var(--muted);font-size:9px;color:var(--muted);cursor:help;font-family:var(--mono);font-weight:700;margin-left:6px;position:relative}
+.help:hover .help-panel{display:block}
+.help-panel{display:none;position:absolute;top:20px;right:-10px;width:280px;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.02em;padding:12px 14px;line-height:1.55;text-transform:none;z-index:30;box-shadow:0 4px 16px rgba(15,20,25,.18)}
+.help-panel::before{content:'';position:absolute;top:-6px;right:14px;width:10px;height:10px;background:var(--ink);transform:rotate(45deg)}
+.gauge-label .delta{color:var(--green);font-weight:600}
+.gauge-label .delta.neg{color:var(--red)}
+.gauge-track{height:8px;background:var(--paper-2);position:relative;overflow:hidden;border:1px solid var(--rule)}
+.gauge-fill{height:100%;background:linear-gradient(90deg,var(--red) 0%,var(--amber) 40%,var(--green) 80%);width:0%;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.gauge-num{font-family:var(--display);font-weight:800;font-size:32px;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.03em;color:var(--ink)}
+
+/* CONSTRAINTS BAND */
+.constraints{background:var(--paper-2);border-bottom:1px solid var(--rule);padding:12px 32px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:11px;min-height:42px}
+.constraints-lbl{font-family:var(--mono);font-weight:700;color:var(--ink);letter-spacing:.2em;text-transform:uppercase;font-size:10px;border-left:3px solid var(--purple);padding-left:10px}
+.con{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.con strong{color:var(--ink);font-weight:600;font-family:var(--display);font-size:13px;letter-spacing:-.005em}
+.con .pill{display:inline-block;padding:2px 8px;background:var(--surface);border:1px solid var(--rule);font-size:11px;color:var(--ink);font-family:var(--display);font-weight:500;letter-spacing:-.005em}
+.con .pill.warn{border-color:var(--amber);background:var(--amber-soft);color:#7a4f08}
+.con-empty{color:var(--muted-2);font-style:italic;font-family:var(--serif);font-size:13px}
+
+/* MAIN */
+main{flex:1;display:grid;grid-template-columns:380px 1fr 360px;gap:0;border-bottom:1px solid var(--rule);min-height:0}
+
+/* BRIEF */
+.brief{border-right:1px solid var(--rule);padding:24px;display:flex;flex-direction:column;gap:16px;background:var(--surface);position:relative;overflow-y:auto;max-height:calc(100vh - 145px)}
+.brief::after{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:repeating-linear-gradient(45deg,var(--ink) 0 6px,transparent 6px 14px);opacity:.65}
+.brief-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center;font-weight:600}
+.dot-pulse{width:7px;height:7px;background:var(--red);box-shadow:0 0 0 0 rgba(200,16,46,.4);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,16,46,.4)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.brief h2{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.02;letter-spacing:-.025em;color:var(--ink)}
+.brief h2 em{font-style:italic;color:var(--purple);font-weight:700}
+.brief-sub{font-family:var(--serif);font-size:14px;line-height:1.5;color:var(--ink-2);font-style:italic}
+.dossier-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.dossier-cell{background:var(--surface);padding:10px 12px}
+.dossier-cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:3px}
+.dossier-cell .v{font-family:var(--display);font-size:13px;font-weight:500;color:var(--ink);letter-spacing:-.005em;line-height:1.3}
+.intel-block{border-left:3px solid var(--purple);padding:8px 0 8px 14px}
+.intel-block.warn{border-left-color:var(--amber)}
+.intel-block .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600}
+.intel-block.warn .lbl{color:var(--amber)}
+.intel-list{display:flex;flex-direction:column;gap:5px;list-style:none}
+.intel-list li{display:flex;gap:10px;align-items:flex-start;font-family:var(--mono);font-size:12px;color:var(--ink-2);line-height:1.45}
+.intel-list li::before{content:'›';color:var(--purple);font-weight:700;flex-shrink:0}
+.intel-block.warn .intel-list li::before{color:var(--amber)}
+.briefcase{background:var(--paper);border:1px solid var(--rule);padding:12px 14px;font-family:var(--serif);font-size:13px;line-height:1.55;color:var(--ink-2)}
+.briefcase .case-h{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:6px}
+.briefcase em{font-style:italic;color:var(--ink)}
+.brief-hint{font-size:13px;color:var(--ink-2);margin-top:4px;line-height:1.55;font-family:var(--serif)}
+.brief-hint b{color:var(--ink);font-weight:600;font-family:var(--display)}
+.brief-hint i{font-style:italic}
+
+/* CENTER PANEL */
+.workzone{padding:24px 32px;display:flex;flex-direction:column;gap:18px;min-width:0;overflow-y:auto;max-height:calc(100vh - 145px)}
+.zone-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.zone-head h1{font-family:var(--display);font-weight:800;font-size:38px;line-height:.95;letter-spacing:-.03em;color:var(--ink)}
+.zone-head h1 .num{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--muted);display:block;letter-spacing:.18em;margin-bottom:10px}
+.zone-head p{color:var(--ink-2);font-size:14px;max-width:62ch;font-family:var(--serif);line-height:1.5}
+
+.filter-row{display:flex;gap:6px;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);flex-wrap:wrap}
+.filter-row > span{font-weight:600;margin-right:4px}
+.filter-row button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;background:var(--surface);color:var(--muted);border:1px solid var(--rule);padding:6px 10px;cursor:pointer;transition:all .15s;font-weight:500}
+.filter-row button:hover{color:var(--ink);border-color:var(--ink)}
+.filter-row button.active{color:var(--paper);background:var(--ink);border-color:var(--ink)}
+
+/* card grid + cards (used by multiple sections) */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.card{background:var(--surface);padding:14px 16px 12px;display:flex;flex-direction:column;gap:8px;cursor:pointer;position:relative;transition:background .15s;user-select:none;min-height:120px}
+.card:hover{background:#fffdf6}
+.card.selected{background:var(--purple-soft);outline:2px solid var(--purple);outline-offset:-2px}
+.card .sel-tag{display:none;position:absolute;top:8px;right:10px;font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--purple);font-weight:700}
+.card.selected .sel-tag{display:block}
+.card-id{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;font-weight:500}
+.card-name{font-family:var(--display);font-weight:600;font-size:16px;line-height:1.2;letter-spacing:-.015em;color:var(--ink)}
+.card-desc{font-family:var(--serif);font-size:12.5px;color:var(--ink-2);line-height:1.45;font-style:italic}
+.card-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:auto;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.tag{padding:3px 6px;border:1px solid var(--rule);color:var(--muted);background:var(--paper)}
+.tag.tactic{color:var(--ink);border-color:var(--rule);background:var(--paper-2)}
+.tag.risk-high{color:var(--red);border-color:var(--red);background:var(--red-soft)}
+.tag.risk-med{color:var(--amber);border-color:var(--amber);background:var(--amber-soft)}
+.tag.risk-low{color:var(--muted);border-color:var(--rule);background:var(--paper)}
+.tag.cost{color:var(--ink);border-color:var(--ink)}
+.tag.role-cloud{color:var(--purple);border-color:var(--purple);background:var(--purple-soft)}
+.tag.skill{color:var(--ink-2);border-color:var(--rule);background:var(--surface)}
+
+/* RIGHT PANEL (loadout/status) */
+.loadout{border-left:1px solid var(--rule);background:var(--surface);padding:24px;display:flex;flex-direction:column;gap:22px;overflow-y:auto;max-height:calc(100vh - 145px)}
+.lo-head{display:flex;justify-content:space-between;align-items:baseline}
+.lo-head .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lo-head .count{font-family:var(--display);font-weight:800;font-size:36px;letter-spacing:-.035em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.lo-head .count em{color:var(--purple);font-style:normal}
+.lo-list{display:flex;flex-direction:column;gap:5px}
+.lo-empty{border:1.5px dashed var(--rule);padding:22px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted-2);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.lo-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 12px;background:var(--paper);border-left:3px solid var(--purple);font-family:var(--mono);font-size:12px}
+.lo-item .id{color:var(--muted);font-weight:500}
+.lo-item .nm{color:var(--ink);font-family:var(--display);font-size:13px;font-weight:500;letter-spacing:-.005em}
+.lo-item .x{cursor:pointer;color:var(--muted);padding:0 4px;font-size:16px;line-height:1}
+.lo-item .x:hover{color:var(--red)}
+.section-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:600}
+.cov-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:3px}
+.cov{position:relative;aspect-ratio:1;border:1px solid var(--rule);background:var(--paper);display:grid;place-items:center;font-family:var(--mono);font-size:9px;color:var(--muted-2);letter-spacing:.04em;font-weight:600;transition:all .2s}
+.cov.hit{background:var(--purple);border-color:var(--purple);color:var(--paper)}
+.con-list{display:flex;flex-direction:column;gap:10px}
+.con-live{display:flex;flex-direction:column;gap:5px;padding-bottom:9px;border-bottom:1px dashed var(--rule)}
+.con-live:last-child{border-bottom:0;padding-bottom:0}
+.con-live .head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.con-live .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.con-live .val{font-family:var(--display);font-size:12px;font-weight:600;color:var(--ink);letter-spacing:-.005em;font-variant-numeric:tabular-nums}
+.con-live .val.warn{color:var(--amber)}
+.con-live .val.bad{color:var(--red)}
+.con-bar{height:5px;background:var(--paper-2);position:relative;overflow:hidden;border:1px solid var(--rule)}
+.con-bar-fill{height:100%;background:var(--purple);transition:width .4s cubic-bezier(.2,.8,.2,1),background .2s;width:0%}
+.con-bar-fill.warn{background:var(--amber)}
+.con-bar-fill.bad{background:var(--red)}
+.con-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.02em;line-height:1.4}
+.con-meta.warn{color:var(--amber)}
+.con-meta.bad{color:var(--red)}
+
+/* DETECTION-SPECIFIC */
+.det-row{background:var(--surface);border:1px solid var(--rule);padding:14px 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.det-ttp{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap}
+.det-ttp .id{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:500}
+.det-ttp .nm{font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink);letter-spacing:-.01em}
+.det-ttp .ct{font-family:var(--mono);font-size:11px;color:var(--purple);letter-spacing:.08em;font-weight:600}
+.det-options{display:flex;gap:6px;flex-wrap:wrap}
+.det-opt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:6px 10px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer;transition:all .15s;font-weight:500;user-select:none}
+.det-opt:hover{border-color:var(--ink);background:var(--paper-2)}
+.det-opt.selected{background:var(--purple);color:var(--paper);border-color:var(--purple);font-weight:700}
+
+/* SCORECARD (final section) — span the full main grid */
+.scorecard{grid-column:1 / -1;padding:24px 32px;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:24px;width:100%}
+.score-final{display:flex;justify-content:space-between;align-items:center;padding:24px 32px;background:var(--ink);color:var(--paper);position:relative}
+.score-final::before{content:'';position:absolute;left:0;right:0;top:-7px;height:6px;background:repeating-linear-gradient(45deg,var(--red) 0 8px,var(--ink) 8px 16px)}
+.score-final .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#cbc2a8;margin-bottom:6px}
+.score-final h3{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-.025em;line-height:1}
+.score-final .num{font-family:var(--display);font-weight:800;font-size:64px;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.score-final .num small{font-size:24px;color:var(--muted-2);font-weight:500;margin-left:4px}
+.score-bar{flex:1;max-width:340px;margin:0 24px}
+.score-bar-track{height:12px;background:#2a2f3a;position:relative;border:1px solid #3a4053}
+.score-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--amber) 50%,var(--green))}
+
+/* SCORE explanations + REVIEW */
+.bd-explain{
+  grid-column:1 / -1;font-family:var(--serif);font-size:12.5px;color:var(--ink-2);
+  font-style:italic;line-height:1.5;padding:6px 0 10px;border-bottom:1px dashed var(--rule);
+}
+.bd-explain:last-child{border-bottom:0}
+.bd-pen-card{background:var(--surface);border:1px solid var(--rule);padding:18px 20px;margin-bottom:10px}
+.bd-pen-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:10px}
+.bd-pen-head .name{font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:-.005em;color:var(--ink)}
+.bd-pen-head .pts{font-family:var(--display);font-weight:800;font-size:24px;color:var(--red);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.bd-pen-head .pts.ok{color:var(--green)}
+.bd-pen-grid{display:grid;grid-template-columns:80px 1fr;gap:6px 14px;font-family:var(--serif);font-size:13px;line-height:1.55;color:var(--ink-2)}
+.bd-pen-grid .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:3px}
+.bd-pen-grid .val em{font-style:italic;color:var(--ink);font-weight:600;font-family:var(--display)}
+.bd-section{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:6px;margin:24px 0 14px}
+
+.review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.review-card{background:var(--surface);border:1px solid var(--rule);padding:16px 18px}
+.review-card h5{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:8px;border-bottom:1px solid var(--rule);padding-bottom:6px}
+.review-card .v-main{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:-.01em;color:var(--ink);line-height:1.3}
+.review-card ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+.review-card li{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);letter-spacing:0;line-height:1.45;display:flex;gap:8px;align-items:flex-start}
+.review-card li::before{content:'›';color:var(--purple);font-weight:700;flex-shrink:0}
+.review-card .meta{font-family:var(--serif);font-size:12.5px;color:var(--muted);font-style:italic;margin-top:6px}
+
+.review-callout{
+  background:var(--ink);color:var(--paper);padding:20px 24px;
+  border-left:4px solid var(--red);
+  font-family:var(--serif);font-size:14.5px;line-height:1.55;
+  margin-bottom:24px;
+}
+.review-callout strong{font-family:var(--display);color:var(--paper);font-weight:700;display:block;margin-bottom:4px;font-size:13px;letter-spacing:.18em;text-transform:uppercase;font-family:var(--mono)}
+.review-callout em{font-style:italic;color:#cbc2a8}
+
+.scorecard.full{padding:32px 48px;max-width:1280px;margin:0 auto}
+
+.breakdown-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.bd-card{background:var(--surface);border:1px solid var(--rule);padding:18px}
+.bd-card h4{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:12px;border-bottom:1px solid var(--rule);padding-bottom:8px}
+.bd-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--rule);font-family:var(--mono);font-size:12px}
+.bd-row:last-child{border-bottom:0}
+.bd-row .k{font-family:var(--display);font-weight:600;font-size:13px;color:var(--ink);letter-spacing:-.005em}
+.bd-row .meta{font-family:var(--serif);font-size:11.5px;color:var(--muted);font-style:italic;line-height:1.4}
+.bd-row .v{font-family:var(--display);font-weight:700;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+.bd-row .v.bad{color:var(--red)}
+.bd-row .v.ok{color:var(--green)}
+.bd-row .v.warn{color:var(--amber)}
+.bd-row.ttp-pick-row{display:block;padding:14px 0}
+.bd-row.ttp-pick-row .ttp-pick-head{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.bd-row.ttp-pick-row .ttp-pick-reason{font-family:var(--serif);font-size:13px;line-height:1.55;color:var(--ink-2);margin-top:6px;padding-left:0}
+.badge{font-family:var(--mono);font-weight:700;font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--ink)}
+.badge.ok{color:var(--green);border-color:var(--green);background:var(--green-soft)}
+.badge.dev{color:var(--amber);border-color:var(--amber);background:var(--amber-soft)}
+.badge.bad{color:var(--red);border-color:var(--red);background:var(--red-soft)}
+
+/* FOOTER */
+.foot{padding:18px 32px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--rule);background:var(--paper);gap:16px;flex-wrap:wrap}
+.foot .legend{display:flex;gap:18px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);flex-wrap:wrap;font-weight:500}
+.foot .legend i{display:inline-block;width:8px;height:8px;margin-right:6px;vertical-align:middle;border:1px solid var(--ink)}
+.foot .legend i.g{background:var(--green);border-color:var(--green)}
+.foot .legend i.a{background:var(--amber);border-color:var(--amber)}
+.foot .legend i.r{background:var(--red);border-color:var(--red)}
+.btn{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;padding:14px 28px;cursor:pointer;background:var(--ink);color:var(--paper);border:0;position:relative;transition:all .15s}
+.btn:disabled{background:var(--rule);color:var(--muted-2);cursor:not-allowed}
+.btn:not(:disabled):hover{background:var(--purple)}
+.btn::after{content:'→';margin-left:10px;display:inline-block;transition:transform .2s}
+.btn:not(:disabled):hover::after{transform:translateX(4px)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--rule)}
+.btn.ghost::after{content:'';margin:0}
+.btn.ghost::before{content:'←';margin-right:10px}
+.btn.ghost:hover{color:var(--ink);border-color:var(--ink);background:transparent}
+.btn.outline{background:var(--surface);color:var(--ink);border:1.5px solid var(--ink)}
+.btn.outline::after{content:'';margin:0}
+.btn.outline:hover{background:var(--ink);color:var(--paper)}
+.btn-reset{font-family:var(--mono);font-weight:700;font-size:10px;letter-spacing:.18em;text-transform:uppercase;padding:8px 14px;cursor:pointer;background:transparent;color:var(--muted);border:1px solid var(--rule);transition:all .15s}
+.btn-reset:hover{color:var(--red);border-color:var(--red);background:var(--red-soft)}
+.iopt.danger{border-color:var(--red)}
+.iopt.danger::before{color:var(--red);content:'⚠'}
+.iopt.danger:hover{background:var(--red-soft);border-color:var(--red)}
+.iopt.danger:hover::before{color:var(--red);content:'⚠'}
+
+/* INJECT MODAL */
+.imodal{position:fixed;inset:0;background:rgba(15,20,25,.55);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:48px 24px;overflow:auto}
+.imodal.open{display:flex}
+.icard{background:var(--paper);width:min(720px,100%);border:1.5px solid var(--ink);position:relative}
+.icard::before{content:'';position:absolute;left:0;right:0;top:-7px;height:6px;background:repeating-linear-gradient(45deg,var(--red) 0 8px,var(--ink) 8px 16px)}
+.ihead{padding:24px 28px 18px;border-bottom:1px solid var(--rule)}
+.ieyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:8px}
+.ititle{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.02em;color:var(--ink);line-height:1.1}
+.ibody{padding:18px 28px;font-family:var(--serif);font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.ibody em{font-style:italic;color:var(--ink)}
+.iopts{padding:0 28px 28px;display:flex;flex-direction:column;gap:6px}
+.iopt{background:var(--surface);border:1px solid var(--rule);padding:14px 18px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;font-family:var(--display);font-size:14px;color:var(--ink);letter-spacing:-.005em;font-weight:500;text-align:left}
+.iopt:hover{border-color:var(--ink);background:var(--paper-2);transform:translateX(2px)}
+.iopt::before{content:'◯';color:var(--muted);font-family:var(--mono);flex-shrink:0;font-size:14px}
+.iopt:hover::before{color:var(--purple);content:'●'}
+
+/* TOAST */
+.toasts{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:50}
+.toast{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--purple);padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--ink);max-width:340px;letter-spacing:.02em;animation:slidein .3s cubic-bezier(.2,.8,.2,1);box-shadow:0 6px 18px rgba(15,20,25,.08)}
+.toast strong{font-family:var(--display);font-weight:700;letter-spacing:-.005em;display:block;margin-bottom:4px;font-size:13px}
+.toast em{color:var(--purple);font-style:normal;font-weight:600}
+@keyframes slidein{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes slideout{to{transform:translateX(20px);opacity:0}}
+.toast.gone{animation:slideout .3s forwards}
+
+/* BRIEFING (sec 1) layout — single full panel spans the main grid */
+.full-zone{grid-column:1 / -1;padding:32px 48px;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:24px;width:100%}
+.full-zone .stamp{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--red);font-weight:700;border:1px solid var(--red);padding:4px 10px;align-self:flex-start}
+.full-zone h1{font-family:var(--display);font-weight:800;font-size:54px;line-height:.96;letter-spacing:-.03em;color:var(--ink)}
+.full-zone h1 em{font-style:italic;color:var(--purple);font-weight:700}
+.full-zone .lede{font-family:var(--serif);font-size:18px;line-height:1.5;color:var(--ink-2);max-width:62ch}
+.full-zone .lede em{font-style:italic;color:var(--ink)}
+
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.rule-cell{background:var(--surface);padding:18px 20px;display:flex;gap:14px;align-items:flex-start}
+.rule-cell .num{font-family:var(--display);font-weight:800;font-size:32px;color:var(--purple);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em;flex-shrink:0;width:36px}
+.rule-cell .body h4{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);margin-bottom:4px;letter-spacing:-.005em}
+.rule-cell .body p{font-family:var(--serif);font-size:13px;color:var(--ink-2);line-height:1.5}
+
+.scenario-card{background:var(--paper-2);border:1px solid var(--rule);padding:20px 24px;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:flex-start}
+.scenario-card .label{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--red);font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);align-self:stretch}
+.scenario-card .body{font-family:var(--serif);font-size:14px;line-height:1.55;color:var(--ink-2)}
+.scenario-card .body strong{color:var(--ink);font-family:var(--display);font-weight:700;letter-spacing:-.005em}
+
+@media (max-width:1100px){
+  main{grid-template-columns:1fr}
+  .brief,.loadout{border:0;border-bottom:1px solid var(--rule);max-height:none}
+  .breakdown-grid,.rules-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="bar">
+  <div class="crest">
+    <svg class="crest-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="48" height="48" fill="#fffcf2"/>
+      <rect x="0.75" y="0.75" width="46.5" height="46.5" fill="none" stroke="#0f1419" stroke-width="1.5"/>
+      <g>
+        <rect x="9"  y="9"  width="8" height="8" fill="#0f1419"/>
+        <rect x="20" y="9"  width="8" height="8" fill="#0f1419"/>
+        <rect x="31" y="9"  width="8" height="8" fill="#c8102e"/>
+        <rect x="9"  y="20" width="8" height="8" fill="#0f1419"/>
+        <rect x="20" y="20" width="8" height="8" fill="#5b2c87"/>
+        <rect x="31" y="20" width="8" height="8" fill="#0f1419"/>
+        <rect x="9"  y="31" width="8" height="8" fill="#5b2c87"/>
+        <rect x="20" y="31" width="8" height="8" fill="#0f1419"/>
+        <rect x="31" y="31" width="8" height="8" fill="#0f1419"/>
+      </g>
+      <g stroke="#0f1419" stroke-width="1" fill="none">
+        <path d="M3 3 L3 6 M3 3 L6 3"/>
+        <path d="M45 45 L45 42 M45 45 L42 45"/>
+      </g>
+    </svg>
+    <div>
+      <div class="crest-id">LAB&nbsp;1.1 / OPERATIONAL PLANNING</div>
+      <div class="crest-title" id="hdr-title">Engagement Planner</div>
+      <div class="classif">For Authorized Practitioners Only</div>
+    </div>
+  </div>
+  <div class="path" id="path"></div>
+  <div class="gauge-wrap">
+    <div class="gauge">
+      <div class="gauge-label">
+        <span>Intel Fit
+          <span class="help" tabindex="0">?
+            <span class="help-panel">Composite score (0–100) accumulating across all 8 sections. Live but silent — full breakdown only revealed in the final Scorecard.</span>
+          </span>
+        </span>
+        <span class="delta" id="delta">±0</span>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill" id="gfill"></div></div>
+    </div>
+    <div class="gauge-num" id="gnum">00</div>
+  </div>
+</header>
+
+<div class="constraints" id="constraints"></div>
+
+<main id="main"></main>
+
+<footer class="foot">
+  <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+    <button class="btn-reset" id="btn-reset" type="button" title="Clear all progress and restart the lab">↻ Reset lab</button>
+    <div class="legend">
+      <span><i class="g"></i>Aligned</span>
+      <span><i class="a"></i>Diverged</span>
+      <span><i class="r"></i>Off-profile / violation</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px">
+    <button class="btn ghost" id="btn-back">Back</button>
+    <button class="btn" id="btn-next" disabled>Continue</button>
+  </div>
+</footer>
+
+</div>
+
+<div class="imodal" id="imodal"><div class="icard"></div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* =====================================================================
+   STATE
+===================================================================== */
+const STORAGE_KEY = 'lab-1.1-v2';
+const initialState = () => ({
+  step: 0,
+  acceptedRules: false,
+  objective: null,
+  roe: [],
+  roles: [],
+  environment: [],
+  ttps: [],
+  detectionMap: {},  // ttpId -> [techIds]
+  scoreReveal: false,
+  injectQueue: [],            // 3 inject ids picked at lab start
+  injectsResponded: {},       // injectId -> chosen optionId
+});
+let state = (() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(saved && typeof saved === 'object') return Object.assign(initialState(), saved);
+  } catch(e){}
+  return initialState();
+})();
+const persist = () => {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+};
+
+/* =====================================================================
+   DATA
+===================================================================== */
+const STEPS = [
+  {key:'briefing',    label:'Briefing',    icon:'briefing',    title:'Briefing'},
+  {key:'objective',   label:'Objective',   icon:'objective',   title:'Engagement Objective'},
+  {key:'roe',         label:'RoE',         icon:'roe',         title:'Rules of Engagement'},
+  {key:'roles',       label:'Roles',       icon:'roles',       title:'Team Composition'},
+  {key:'environment', label:'Environment', icon:'environment', title:'Monitoring Environment'},
+  {key:'ttps',        label:'TTPs',        icon:'ttps',        title:'Adversary Activities'},
+  {key:'detection',   label:'Detection',   icon:'detection',   title:'Detection Mapping'},
+  {key:'review',      label:'Review',      icon:'review',      title:'Final Review'},
+  {key:'score',       label:'Score',       icon:'score',       title:'Scorecard'},
+];
+
+const TACTICS = [
+  ['IA','Initial Access'], ['EX','Execution'], ['PE','Persistence'],
+  ['PR','Priv Esc'], ['DE','Defense Evasion'], ['CR','Credentials'],
+  ['DI','Discovery'], ['LM','Lat. Movement'], ['EXFIL','Exfiltration'],
+];
+
+const OBJECTIVES = [
+  {id:'A', label:'Detect Crimson Viper within 24h of initial compromise',                          desc:'Compresses mean-time-to-detect against the actor’s observed 3–5 day kill chain. Success is a measurable detection threshold tied to a specific adversary profile.', score:10},
+  {id:'B', label:'Find all attackers currently in the network',                                     desc:'Frames the engagement as an enterprise-wide threat hunt for any unknown foothold. Success is measured by the count of intrusions discovered, scope unlimited.',                       score:3},
+  {id:'C', label:'Produce evidence for the PCI-DSS 4.0 Req 11.4 annual penetration test',          desc:'Aims to satisfy a fixed audit checklist on a calendar-driven cadence. Success is the external assessor’s sign-off and the gap remediation roadmap.',                                  score:5},
+  {id:'D', label:'Discover zero-day vulnerabilities in NOVA’s stack within the engagement window',  desc:'Aims to surface previously-unknown vulnerabilities in NOVA’s hardware, software, and SaaS stack ahead of any adversary. Success is the count of novel CVE-class findings disclosed to vendors with reproducible PoCs.',                                          score:2},
+  {id:'E', label:'Find as many vulnerabilities as possible across the environment in 5 days',      desc:'Frames success as breadth of issues uncovered. Aims to maximize the count of distinct findings (CVEs, misconfigurations, weak controls) inside a fixed timebox.',                       score:4},
+];
+
+const ROE_CLAUSES = [
+  {id:'r1', label:'No production impact / destructive actions',     type:'required'},
+  {id:'r2', label:'All actions logged with timestamps',             type:'required'},
+  {id:'r3', label:'Defined escalation path with named on-call',     type:'required'},
+  {id:'r4', label:'Pre-agreed engagement window with stop-time',    type:'recommended'},
+  {id:'r5', label:'No PII handling without legal sign-off',         type:'recommended'},
+  {id:'r6', label:'Daily sync between red and blue leads',          type:'recommended'},
+  {id:'r11',label:'Pre-shared incident contact tree with sponsor',  type:'recommended'},
+  {id:'r12',label:'Compliance officer embedded in daily syncs',     type:'recommended'},
+  {id:'r13',label:'Backup snapshot of environment before start',    type:'recommended'},
+  {id:'r7', label:'Monitor user activity without consent',          type:'trap',        cost:8},
+  {id:'r8', label:'Conduct DoS-style stress on tier-1 systems',     type:'trap',        cost:8},
+  {id:'r14',label:'Engage law enforcement preemptively',            type:'trap',        cost:6},
+  {id:'r9', label:'Manual approval for every individual action',    type:'restrictive', cost:4},
+  {id:'r10',label:'No external network egress at all',              type:'restrictive', cost:4},
+  {id:'r15',label:'All artifacts purged within 1h of engagement end', type:'restrictive', cost:3},
+];
+
+const ROLES_POOL = [
+  {id:'rl1',  name:'Red Lead',           cost:2000, skills:['red','c2'],     required:true},
+  {id:'rl2',  name:'Detection Engineer A', cost:1500, skills:['det','sigma'], required:true},
+  {id:'rl3',  name:'Detection Engineer B', cost:1500, skills:['det','edr']},
+  {id:'rl4',  name:'CTI Analyst',        cost:1200, skills:['cti'],          required:true},
+  {id:'rl5',  name:'Cloud Sec Engineer', cost:2000, skills:['cloud']},
+  {id:'rl6',  name:'Compliance Officer', cost:1500, skills:['legal','admin']},
+  {id:'rl7',  name:'IR Lead',            cost:2000, skills:['ir']},
+  {id:'rl8',  name:'Project Manager',    cost:1000, skills:['admin'],        required:true},
+  {id:'rl9',  name:'Junior Red Teamer',  cost:800,  skills:['red']},
+  {id:'rl10', name:'DevOps',             cost:1500, skills:['infra']},
+];
+const ROLES_BUDGET_TOTAL = 50000; // 5 days × team
+
+const ENVIRONMENT_SENSORS = [
+  {id:'e1', name:'Workstation EDR',          cost:3000, zone:'endpoint',  critical:true},
+  {id:'e2', name:'Server EDR',               cost:3500, zone:'server',    critical:true},
+  {id:'e3', name:'Email Gateway',            cost:2000, zone:'perimeter', critical:true},
+  {id:'e4', name:'Cloud Audit Logs',         cost:1500, zone:'cloud'},
+  {id:'e5', name:'DNS / Network IDS',        cost:2500, zone:'network'},
+  {id:'e6', name:'Honeytokens / Decoys',     cost:1000, zone:'endpoint'},
+  {id:'e7', name:'AD Audit Logging',         cost:1200, zone:'identity',  critical:true},
+  {id:'e8', name:'Web Proxy Inspection',     cost:1500, zone:'perimeter'},
+  {id:'e9', name:'Duplicate Workstation EDR',cost:3000, zone:'endpoint',  redundant:true},
+  {id:'e10',name:'OT/ICS Network Tap',       cost:4000, zone:'ot',        irrelevant:true},
+];
+const ENV_BUDGET = 14000;
+
+const TTPS = [
+  // Crimson Viper observed TTPs
+  {id:'T1566.001', name:'Spearphishing Attachment',  tactic:'IA',    tag:'observed', risk:'high', hours:6,  cost:1500, role:'red'},
+  {id:'T1078',     name:'Valid Accounts',            tactic:'IA',    tag:'observed', risk:'high', hours:4,  cost:0,    role:'red'},
+  {id:'T1078.004', name:'Cloud Accounts',            tactic:'IA',    tag:'observed', risk:'high', hours:8,  cost:2500, role:'cloud', requires:'cti'},
+  {id:'T1656',     name:'Impersonation',             tactic:'IA',    tag:'observed', actor:'CV-confirmed', risk:'high', hours:6,  cost:1000, role:'red',  requires:'cti'},
+  {id:'T1059.001', name:'PowerShell',                tactic:'EX',    tag:'observed', risk:'high', hours:5,  cost:0,    role:'red'},
+  {id:'T1218.011', name:'Rundll32',                  tactic:'DE',    tag:'observed', risk:'med',  hours:4,  cost:0,    role:'red'},
+  {id:'T1068',     name:'Exploit for Priv Esc',      tactic:'PR',    tag:'observed', risk:'med',  hours:8,  cost:1500, role:'red'},
+  {id:'T1558.003', name:'Kerberoasting',             tactic:'CR',    tag:'observed', risk:'high', hours:6,  cost:500,  role:'red'},
+  {id:'T1003.001', name:'OS Credential Dumping: LSASS', tactic:'CR', tag:'observed', risk:'high', hours:5,  cost:1500, role:'red'},
+  {id:'T1087',     name:'Account Discovery',         tactic:'DI',    tag:'observed', risk:'med',  hours:4,  cost:0,    role:'red'},
+  {id:'T1071.001', name:'Application Layer Protocol: Web', tactic:'C2', tag:'observed', risk:'high', hours:6, cost:1000, role:'red'},
+  {id:'T1021.002', name:'SMB / Admin Shares',        tactic:'LM',    tag:'observed', risk:'high', hours:5,  cost:0,    role:'red'},
+  {id:'T1098.003', name:'Add Roles to Cloud App',    tactic:'PE',    tag:'observed', actor:'CV-drift',     risk:'high', hours:8,  cost:2500, role:'cloud', requires:'cti'},
+  {id:'T1567.002', name:'Exfil to Cloud Storage',    tactic:'EXFIL', tag:'observed', risk:'high', hours:7,  cost:1500, role:'red'},
+
+  // Adjacent / "other" TTPs — different actors
+  {id:'T1190',     name:'Exploit Public-Facing App', tactic:'IA',    tag:'other',    risk:'high', actor:'FIN7-style',         hours:12, cost:2500, role:'red'},
+  {id:'T1133',     name:'External Remote Services',  tactic:'IA',    tag:'other',    risk:'med',  actor:'APT29-style',        hours:6,  cost:1000, role:'red'},
+  {id:'T1486',     name:'Data Encrypted for Impact', tactic:'IM',    tag:'other',    risk:'high', actor:'ransomware',         violates:'roe', hours:10, cost:500, role:'red'},
+  {id:'T1485',     name:'Data Destruction',          tactic:'IM',    tag:'other',    risk:'high', actor:'wiper-style',         violates:'roe', hours:6, cost:500, role:'red'},
+  {id:'T1027',     name:'Obfuscated Files / Info',   tactic:'DE',    tag:'other',    risk:'low',  hours:6,  cost:1000, role:'red'},
+  {id:'T1110.003', name:'Password Spraying',         tactic:'CR',    tag:'other',    risk:'med',  actor:'APT28-style',        hours:8,  cost:800,  role:'red'},
+  {id:'T1505.003', name:'Web Shell',                 tactic:'PE',    tag:'other',    risk:'high', actor:'China-nexus',        hours:10, cost:1500, role:'red'},
+  {id:'T1098.001', name:'Additional Cloud Creds',    tactic:'PE',    tag:'other',    risk:'med',  actor:'APT39-style',        hours:8,  cost:2000, role:'cloud'},
+  {id:'T1546.003', name:'WMI Event Subscription',    tactic:'PE',    tag:'other',    risk:'med',  hours:7,  cost:1000, role:'red'},
+  {id:'T1071.004', name:'DNS Tunneling',             tactic:'C2',    tag:'other',    risk:'med',  actor:'APT39-style',        hours:8,  cost:2000, role:'red',  requires:'cti'},
+  {id:'T1090.003', name:'Multi-hop Proxy',           tactic:'C2',    tag:'other',    risk:'low',  hours:10, cost:3000, role:'red'},
+
+  // Noise / red-herring TTPs (off-profile)
+  {id:'T1037.001', name:'Logon Script (Windows)',    tactic:'PE',    tag:'noise',    risk:'low',  hours:4,  cost:500,  role:'red'},
+  {id:'T1611',     name:'Escape to Host',            tactic:'PR',    tag:'noise',    risk:'low',  hours:12, cost:3000, role:'red'},
+  {id:'T1548.005', name:'Sudo Caching (Linux)',      tactic:'PR',    tag:'noise',    risk:'low',  hours:6,  cost:500,  role:'red'},
+  {id:'T1546.014', name:'Emond (macOS)',             tactic:'PE',    tag:'noise',    risk:'low',  hours:6,  cost:500,  role:'red'},
+  {id:'T1422',     name:'Net Config Discovery',      tactic:'DI',    tag:'noise',    risk:'low',  hours:4,  cost:0,    role:'red'},
+  {id:'T1495',     name:'Firmware Corruption',       tactic:'IM',    tag:'noise',    risk:'low',  hours:16, cost:5000, role:'red'},
+];
+
+const WINDOW_HOURS = 40;
+const TTP_BUDGET = 30000;
+
+// Injects — 6 in pool, 3 fire per session at random
+const INJECTS = [
+  {
+    id:'i1', triggerAfter:'roe',
+    title:'Legal · PII leak at peer firm',
+    body:'A Tier-1 fintech 30 miles from NOVA disclosed a breach of 1.2M PII records this morning. NYDFS is now actively monitoring scope expansions across the sector. Your current RoE may not survive auditor scrutiny.',
+    options:[
+      {id:'a', label:'Add explicit "no PII handling without legal sign-off" clause to RoE', score:5,  action:'add_roe',     target:'r5'},
+      {id:'b', label:'Halt engagement until external counsel reviews — accept 3-day delay', score:-3, action:null},
+      {id:'c', label:'Continue as-is and document the regulatory risk for the CISO', score:0,  action:null},
+      {id:'d', label:'Switch to read-only monitoring for the entire engagement', score:-5, action:null},
+    ],
+  },
+  {
+    id:'i2', triggerAfter:'ttps',
+    title:'CTI · Crimson Viper drift confirmed',
+    body:'Your CTI partner just confirmed Crimson Viper used OAuth consent grants in two campaigns this quarter. Your current TTP loadout may not reflect their active tradecraft.',
+    options:[
+      {id:'a', label:'Swap a lower-value TTP for T1078.004 Cloud Accounts', score:5, action:'swap_in_ttp', target:'T1078.004'},
+      {id:'b', label:'Skip — your current loadout is fine',                  score:-2, action:null},
+      {id:'c', label:'Add T1190 Public-Facing Exploit (familiar territory)', score:-5, action:'swap_in_ttp', target:'T1190'},
+    ],
+  },
+  {
+    id:'i3', triggerAfter:'environment',
+    title:'Finance · Q4 sensor budget cut',
+    body:'CFO mandates a 30% sensor-budget cut effective immediately. Your current sensor deployment may exceed the new ceiling.',
+    options:[
+      {id:'a', label:'Drop the most expensive non-critical sensor automatically', score:3, action:'drop_env_sensor'},
+      {id:'b', label:'Defer the cut until Q1 — absorb the overrun',                score:-5, action:null},
+      {id:'c', label:'Swap an EDR for a cheaper alternative (no-op for now)',      score:0, action:null},
+    ],
+  },
+  {
+    id:'i4', triggerAfter:'roles',
+    title:'HR · Key team member unavailable',
+    body:'Your CTI Analyst just went on emergency leave. Engagement starts in 4 days. You must either backfill or absorb the gap.',
+    options:[
+      {id:'a', label:'Hire Compliance Officer — overlaps legal + admin coverage', score:3, action:'add_role', target:'rl6'},
+      {id:'b', label:'Push the Junior Red Teamer to do CTI duties (skill gap)',    score:-5, action:'add_role', target:'rl9'},
+      {id:'c', label:'Run engagement without CTI coverage at all',                  score:-8, action:null},
+    ],
+  },
+  {
+    id:'i5', triggerAfter:'environment',
+    title:'Scope · IT-Ops carve-out',
+    body:'After contract signing, IT-Ops successfully argued production servers fall outside scope. You can no longer monitor the server zone.',
+    options:[
+      {id:'a', label:'Refocus on endpoint + identity coverage (workable)',     score:2, action:null},
+      {id:'b', label:'Push back via legal; request 1-day delay to re-scope',   score:0, action:null},
+      {id:'c', label:'Continue mapping server-side detections regardless',     score:-6, action:null},
+    ],
+  },
+  {
+    id:'i6', triggerAfter:'detection',
+    title:'IR · Critical CVE mid-execution',
+    body:'A vendor zero-day drops on Day 2 of execution. The IR team requests a 48h engagement pause to triage their own environment.',
+    options:[
+      {id:'a', label:'Pause and absorb the 48h hit on the 5-day window',     score:3, action:null},
+      {id:'b', label:'Continue execution; coordinate via daily syncs only',   score:-2, action:null},
+      {id:'c', label:'Pivot offensive activity to non-affected systems',      score:1, action:null},
+    ],
+  },
+];
+
+// Detection technologies pool. `requires` = sensor IDs (any one satisfies).
+// Empty `requires` = always available regardless of environment (e.g. pre-existing tools).
+const DETECTIONS = [
+  {id:'d1',  name:'Sysmon + Process Tree',         covers:['EX','PR','DI'],         requires:['e1','e2']},
+  {id:'d2',  name:'EDR Behavioral',                covers:['EX','PR','PE','DE'],    requires:['e1','e2']},
+  {id:'d3',  name:'Email Gateway',                 covers:['IA'],                   requires:['e3']},
+  {id:'d4',  name:'AD Audit (4624/4768)',          covers:['IA','CR','LM'],         requires:['e7']},
+  {id:'d5',  name:'Honeytoken Trip',               covers:['IA','CR','DI'],         requires:['e6']},
+  {id:'d6',  name:'Suricata IDS',                  covers:['IA','EXFIL','LM','C2'], requires:['e5']},
+  {id:'d7',  name:'Cloud Audit / CASB',            covers:['IA','PE','EXFIL'],      requires:['e4']},
+  {id:'d8',  name:'Script Block Logging',          covers:['EX','DE'],              requires:['e1','e2']},
+  {id:'d9',  name:'Kerberos PAC Inspection',       covers:['CR'],                   requires:['e7']},
+  {id:'d10', name:'Network Flow Analysis',         covers:['EXFIL','LM','C2'],      requires:['e5']},
+  {id:'d11', name:'OT/ICS Sensor',                 covers:[],                       requires:['e10']},   // red herring; only visible if OT tap deployed
+  {id:'d12', name:'Mainframe Audit',               covers:[],                       requires:[]},        // red herring; pre-existing legacy tool, always shown
+  {id:'d13', name:'LSASS Memory Watch',            covers:['CR'],                   requires:['e2']},
+  {id:'d14', name:'DNS Sinkhole + RPZ',            covers:['C2'],                   requires:['e5']},
+  {id:'d15', name:'Web Proxy SSL Inspection',      covers:['IA','C2','EXFIL'],      requires:['e8']},
+  {id:'d16', name:'Cloud Identity Anomaly',        covers:['IA','PE'],              requires:['e4']},
+  {id:'d17', name:'Backup Integrity Monitor',      covers:['IM'],                   requires:['e2']},
+];
+
+// Filter detections by what sensors the user actually deployed in section 5.
+function availableDetections(s){
+  const picked = new Set(s.environment || []);
+  return DETECTIONS.filter(d => !d.requires || d.requires.length === 0 || d.requires.some(r => picked.has(r)));
+}
+
+/* =====================================================================
+   SCORING (per-section + cross-section)
+===================================================================== */
+const WEIGHTS = {objective:10, roe:12, roles:14, environment:14, ttps:25, detection:25};
+
+function scoreObjective(s){
+  if(!s.objective) return 0;
+  const o = OBJECTIVES.find(x=>x.id===s.objective);
+  return o ? o.score : 0;
+}
+function scoreRoe(s){
+  let pts = 0;
+  s.roe.forEach(id=>{
+    const c = ROE_CLAUSES.find(x=>x.id===id);
+    if(!c) return;
+    if(c.type === 'required')    pts += 3;
+    if(c.type === 'recommended') pts += 1.5;
+    if(c.type === 'trap')        pts -= c.cost;
+    if(c.type === 'restrictive') pts -= c.cost;
+  });
+  return Math.max(0, Math.min(WEIGHTS.roe, pts));
+}
+function scoreRoles(s){
+  let pts = 0;
+  const picked = s.roles.map(id => ROLES_POOL.find(r=>r.id===id)).filter(Boolean);
+  // 4 required roles present => 2pt each
+  ROLES_POOL.filter(r=>r.required).forEach(req=>{
+    if(picked.some(p=>p.id===req.id)) pts += 2;
+  });
+  // budget OK
+  const totalCost = picked.reduce((a,r)=>a + r.cost*5, 0); // 5-day FTE
+  if(totalCost <= ROLES_BUDGET_TOTAL) pts += 4;
+  // size 4..6
+  if(picked.length >= 4 && picked.length <= 6) pts += 2;
+  return Math.max(0, Math.min(WEIGHTS.roles, pts));
+}
+function scoreEnvironment(s){
+  let pts = 0;
+  const picked = s.environment.map(id => ENVIRONMENT_SENSORS.find(e=>e.id===id)).filter(Boolean);
+  // critical zones covered
+  ENVIRONMENT_SENSORS.filter(e=>e.critical).forEach(crit=>{
+    if(picked.some(p=>p.id===crit.id)) pts += 3;
+  });
+  // budget OK
+  const total = picked.reduce((a,e)=>a+e.cost,0);
+  if(total <= ENV_BUDGET) pts += 3;
+  // no redundant + no irrelevant
+  const hasRed = picked.some(p=>p.redundant);
+  const hasIrrel = picked.some(p=>p.irrelevant);
+  if(!hasRed && !hasIrrel) pts += 2;
+  return Math.max(0, Math.min(WEIGHTS.environment, pts));
+}
+function scoreTtps(s){
+  let pts = 0;
+  const picked = s.ttps.map(id => TTPS.find(t=>t.id===id)).filter(Boolean);
+  picked.forEach(t=>{ if(t.tag==='observed') pts += 3.5; });
+  const tactics = new Set(picked.map(t=>t.tactic));
+  ['IA','EX','CR','EXFIL'].forEach(k=>{ if(tactics.has(k)) pts += 1; });
+  return Math.max(0, Math.min(WEIGHTS.ttps, pts));
+}
+function scoreDetection(s){
+  let pts = 0;
+  const ttps = s.ttps.map(id => TTPS.find(t=>t.id===id)).filter(Boolean);
+  const credit = WEIGHTS.detection / Math.max(1, ttps.length);
+  ttps.forEach(t=>{
+    const techIds = (s.detectionMap[t.id] || []);
+    if(techIds.length === 0) return;
+    const techs = techIds.map(id => DETECTIONS.find(d=>d.id===id)).filter(Boolean);
+    const anyCovers = techs.some(d => d.covers.includes(t.tactic));
+    const anyIrrelevant = techs.some(d => d.covers.length === 0);
+    if(anyCovers) pts += credit;
+    if(anyIrrelevant) pts -= 1;
+  });
+  return Math.max(0, Math.min(WEIGHTS.detection, pts));
+}
+
+function crossPenalties(s){
+  const p = [];
+  const ttps = s.ttps.map(id => TTPS.find(t=>t.id===id)).filter(Boolean);
+  const skills = new Set(s.roles.flatMap(id => (ROLES_POOL.find(r=>r.id===id)||{skills:[]}).skills));
+  // cloud TTP without cloud-sec role
+  const cloudTtps = ttps.filter(t=>t.role==='cloud');
+  if(cloudTtps.length > 0 && !skills.has('cloud')){
+    p.push({key:'cloud_role_gap', label:'Cloud TTP without cloud-sec role', count:cloudTtps.length, perItem:3});
+  }
+  // CTI-dependent TTP without CTI Analyst (the analyst keeps actor attribution and TTP set current)
+  const ctiTtps = ttps.filter(t=>t.requires==='cti');
+  if(ctiTtps.length > 0 && !skills.has('cti')){
+    p.push({key:'cti_role_gap', label:'CTI-dependent TTP without CTI analyst', count:ctiTtps.length, perItem:3});
+  }
+  // RoE-violating TTPs
+  const roeViol = ttps.filter(t=>t.violates==='roe');
+  if(roeViol.length > 0){
+    p.push({key:'roe_viol', label:'RoE-violating TTP picked', count:roeViol.length, perItem:8});
+  }
+  // Detection budget bust
+  const ttpCost = ttps.reduce((a,t)=>a+t.cost,0);
+  if(ttpCost > TTP_BUDGET){
+    p.push({key:'ttp_budget', label:'TTP licensing budget exceeded', count:1, perItem:5});
+  }
+  // Detection coverage gap
+  const gaps = ttps.filter(t => {
+    const techs = (s.detectionMap[t.id] || []).map(id => DETECTIONS.find(d=>d.id===id)).filter(Boolean);
+    return techs.length === 0 || !techs.some(d => d.covers.includes(t.tactic));
+  });
+  if(gaps.length > 0){
+    p.push({key:'cov_gap', label:'TTP without aligned detection', count:gaps.length, perItem:3});
+  }
+  return p;
+}
+
+function scoreInjects(s){
+  let pts = 0;
+  for(const injId of s.injectQueue){
+    const optId = s.injectsResponded[injId];
+    if(!optId) continue;
+    const inj = INJECTS.find(i => i.id === injId); if(!inj) continue;
+    const opt = inj.options.find(o => o.id === optId); if(!opt) continue;
+    pts += opt.score;
+  }
+  return pts;
+}
+
+function computeScore(s){
+  const sec = {
+    objective:   scoreObjective(s),
+    roe:         scoreRoe(s),
+    roles:       scoreRoles(s),
+    environment: scoreEnvironment(s),
+    ttps:        scoreTtps(s),
+    detection:   scoreDetection(s),
+  };
+  const subtotal = Object.values(sec).reduce((a,b)=>a+b, 0);
+  const penalties = crossPenalties(s);
+  const penTotal = penalties.reduce((a,p)=>a + p.count*p.perItem, 0);
+  const injectPts = scoreInjects(s);
+  const final = Math.max(0, Math.min(100, Math.round(subtotal - penTotal + injectPts)));
+  return {sec, subtotal, penalties, penTotal, injectPts, final};
+}
+
+// Live gauge: only includes COMPLETED sections (no penalties applied)
+function liveGauge(s){
+  let pts = 0;
+  if(s.step > 1) pts += scoreObjective(s);
+  if(s.step > 2) pts += scoreRoe(s);
+  if(s.step > 3) pts += scoreRoles(s);
+  if(s.step > 4) pts += scoreEnvironment(s);
+  if(s.step > 5) pts += scoreTtps(s);
+  if(s.step > 6) pts += scoreDetection(s);
+  return Math.round(pts);
+}
+
+/* =====================================================================
+   DOM HELPERS
+===================================================================== */
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const el = (tag, opts={}) => {
+  const e = document.createElement(tag);
+  if(opts.cls) e.className = opts.cls;
+  if(opts.text != null) e.textContent = opts.text;
+  if(opts.title) e.title = opts.title;
+  if(opts.id) e.id = opts.id;
+  if(opts.data) for(const k in opts.data) e.dataset[k] = opts.data[k];
+  if(opts.attrs) for(const k in opts.attrs) e.setAttribute(k, opts.attrs[k]);
+  return e;
+};
+const svgEl = (name, attrs={}) => {
+  const e = document.createElementNS(SVG_NS, name);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+};
+const buildSvg = (...children) => {
+  const s = svgEl('svg',{viewBox:'0 0 12 12', xmlns:SVG_NS});
+  children.forEach(c => s.appendChild(c));
+  return s;
+};
+const clear = node => { while(node.firstChild) node.removeChild(node.firstChild); };
+const ICONS = {
+  briefing:    () => buildSvg(
+    svgEl('path',{d:'M2.5 1.5 H7.5 L10 4 V10.5 H2.5 Z', fill:'none', stroke:'currentColor', 'stroke-width':'1.2'}),
+    svgEl('path',{d:'M7.5 1.5 V4 H10', fill:'none', stroke:'currentColor', 'stroke-width':'1.2'}),
+    svgEl('line',{x1:'4', y1:'6.5', x2:'8.5', y2:'6.5', stroke:'currentColor', 'stroke-width':'1'}),
+    svgEl('line',{x1:'4', y1:'8.5', x2:'7.5', y2:'8.5', stroke:'currentColor', 'stroke-width':'1'}),
+  ),
+  objective:   () => buildSvg(
+    svgEl('circle',{cx:'6', cy:'6', r:'4.7', fill:'none', stroke:'currentColor', 'stroke-width':'1'}),
+    svgEl('circle',{cx:'6', cy:'6', r:'2.6', fill:'none', stroke:'currentColor', 'stroke-width':'1'}),
+    svgEl('circle',{cx:'6', cy:'6', r:'0.9', fill:'currentColor'}),
+  ),
+  roe:         () => buildSvg(
+    svgEl('path',{d:'M2.5 1.5 H9.5 V10.5 H2.5 Z', fill:'none', stroke:'currentColor', 'stroke-width':'1.2'}),
+    svgEl('line',{x1:'4', y1:'4', x2:'8', y2:'4', stroke:'currentColor', 'stroke-width':'1'}),
+    svgEl('line',{x1:'4', y1:'6', x2:'8', y2:'6', stroke:'currentColor', 'stroke-width':'1'}),
+    svgEl('line',{x1:'4', y1:'8', x2:'7', y2:'8', stroke:'currentColor', 'stroke-width':'1'}),
+  ),
+  roles:       () => buildSvg(
+    svgEl('circle',{cx:'3', cy:'4', r:'1.6', fill:'currentColor'}),
+    svgEl('circle',{cx:'9', cy:'4', r:'1.6', fill:'currentColor'}),
+    svgEl('circle',{cx:'6', cy:'8.5', r:'1.6', fill:'currentColor'}),
+  ),
+  environment: () => buildSvg(
+    svgEl('circle',{cx:'2.5', cy:'2.5', r:'1.1', fill:'currentColor'}),
+    svgEl('circle',{cx:'9.5', cy:'2.5', r:'1.1', fill:'currentColor'}),
+    svgEl('circle',{cx:'6', cy:'6', r:'1.1', fill:'currentColor'}),
+    svgEl('circle',{cx:'2.5', cy:'9.5', r:'1.1', fill:'currentColor'}),
+    svgEl('circle',{cx:'9.5', cy:'9.5', r:'1.1', fill:'currentColor'}),
+    svgEl('line',{x1:'2.5', y1:'2.5', x2:'6', y2:'6', stroke:'currentColor', 'stroke-width':'.8'}),
+    svgEl('line',{x1:'9.5', y1:'2.5', x2:'6', y2:'6', stroke:'currentColor', 'stroke-width':'.8'}),
+    svgEl('line',{x1:'2.5', y1:'9.5', x2:'6', y2:'6', stroke:'currentColor', 'stroke-width':'.8'}),
+    svgEl('line',{x1:'9.5', y1:'9.5', x2:'6', y2:'6', stroke:'currentColor', 'stroke-width':'.8'}),
+  ),
+  ttps:        () => buildSvg(
+    svgEl('rect',{x:'1', y:'1', width:'2.6', height:'2.6', fill:'currentColor', opacity:'0.4'}),
+    svgEl('rect',{x:'4.7', y:'1', width:'2.6', height:'2.6', fill:'currentColor', opacity:'0.4'}),
+    svgEl('rect',{x:'8.4', y:'1', width:'2.6', height:'2.6', fill:'currentColor', opacity:'0.4'}),
+    svgEl('rect',{x:'1', y:'4.7', width:'2.6', height:'2.6', fill:'currentColor', opacity:'0.4'}),
+    svgEl('rect',{x:'4.7', y:'4.7', width:'2.6', height:'2.6', fill:'currentColor'}),
+    svgEl('rect',{x:'8.4', y:'4.7', width:'2.6', height:'2.6', fill:'currentColor', opacity:'0.4'}),
+    svgEl('rect',{x:'1', y:'8.4', width:'2.6', height:'2.6', fill:'currentColor', opacity:'0.4'}),
+    svgEl('rect',{x:'4.7', y:'8.4', width:'2.6', height:'2.6', fill:'currentColor', opacity:'0.4'}),
+    svgEl('rect',{x:'8.4', y:'8.4', width:'2.6', height:'2.6', fill:'currentColor', opacity:'0.4'}),
+  ),
+  detection:   () => buildSvg(
+    svgEl('path',{d:'M1 6 Q6 1.5 11 6 Q6 10.5 1 6 Z', fill:'none', stroke:'currentColor', 'stroke-width':'1.1'}),
+    svgEl('circle',{cx:'6', cy:'6', r:'1.8', fill:'currentColor'}),
+  ),
+  review:      () => buildSvg(
+    svgEl('rect',{x:'2', y:'1.5', width:'8', height:'9', fill:'none', stroke:'currentColor', 'stroke-width':'1.1'}),
+    svgEl('line',{x1:'3.5', y1:'4',   x2:'8.5', y2:'4',   stroke:'currentColor', 'stroke-width':'.9'}),
+    svgEl('line',{x1:'3.5', y1:'6',   x2:'8.5', y2:'6',   stroke:'currentColor', 'stroke-width':'.9'}),
+    svgEl('line',{x1:'3.5', y1:'8',   x2:'7',   y2:'8',   stroke:'currentColor', 'stroke-width':'.9'}),
+    svgEl('path',{d:'M9.2 7.5 L10.5 8.8 L8.8 10.5', fill:'none', stroke:'currentColor', 'stroke-width':'1.1'}),
+  ),
+  score:       () => buildSvg(
+    svgEl('rect',{x:'1.5', y:'7', width:'2.2', height:'4', fill:'currentColor'}),
+    svgEl('rect',{x:'4.9', y:'4.5', width:'2.2', height:'6.5', fill:'currentColor'}),
+    svgEl('rect',{x:'8.3', y:'2', width:'2.2', height:'9', fill:'currentColor'}),
+  ),
+};
+
+/* =====================================================================
+   PATH / GAUGE / CONSTRAINTS BAND
+===================================================================== */
+function renderPath(){
+  const p = document.getElementById('path');
+  clear(p);
+  STEPS.forEach((stp, i)=>{
+    const stClass = i < state.step ? 'done' : i === state.step ? 'now' : '';
+    const c = el('div',{cls:'crumb'});
+    const stepEl = el('span',{cls:'step ' + stClass});
+    if(stClass === 'done') stepEl.textContent = '✓';
+    else if(ICONS[stp.icon]) stepEl.appendChild(ICONS[stp.icon]());
+    c.appendChild(stepEl);
+    c.appendChild(el('span',{cls: stClass==='now' ? '' : 'lbl-dim', text:stp.label}));
+    p.appendChild(c);
+  });
+}
+
+let prevGauge = 0;
+function renderGauge(){
+  const v = liveGauge(state);
+  document.getElementById('gfill').style.width = v + '%';
+  document.getElementById('gnum').textContent = String(v).padStart(2,'0');
+  const d = v - prevGauge;
+  const $delta = document.getElementById('delta');
+  $delta.textContent = (d>=0?'+':'') + d;
+  $delta.classList.toggle('neg', d<0);
+  prevGauge = v;
+}
+
+function renderConstraintsBand(){
+  const band = document.getElementById('constraints');
+  clear(band);
+  band.appendChild(el('div',{cls:'constraints-lbl', text:'Carried Forward'}));
+  if(state.step === 0){
+    band.appendChild(el('div',{cls:'con-empty', text:'No prior decisions yet — Briefing in progress.'}));
+    return;
+  }
+  if(state.objective){
+    const o = OBJECTIVES.find(x=>x.id===state.objective);
+    const c = el('div',{cls:'con'});
+    c.appendChild(el('strong',{text:'Objective'}));
+    c.appendChild(el('span',{cls:'pill', text:o.label.length>50 ? o.label.slice(0,48)+'…' : o.label}));
+    band.appendChild(c);
+  }
+  if(state.roe.length){
+    const traps = state.roe.filter(id => {
+      const x = ROE_CLAUSES.find(c=>c.id===id); return x && (x.type==='trap' || x.type==='restrictive');
+    }).length;
+    const c = el('div',{cls:'con'});
+    c.appendChild(el('strong',{text:'RoE'}));
+    c.appendChild(el('span',{cls:'pill ' + (traps?'warn':''), text:`${state.roe.length} clauses${traps ? ' · ' + traps + ' risky' : ''}`}));
+    band.appendChild(c);
+  }
+  if(state.roles.length){
+    const skills = new Set(state.roles.flatMap(id => (ROLES_POOL.find(r=>r.id===id)||{skills:[]}).skills));
+    const lacksCloud = !skills.has('cloud');
+    const c = el('div',{cls:'con'});
+    c.appendChild(el('strong',{text:'Roles'}));
+    c.appendChild(el('span',{cls:'pill ' + (lacksCloud?'warn':''), text:`${state.roles.length} hired${lacksCloud ? ' · no cloud' : ''}`}));
+    band.appendChild(c);
+  }
+  if(state.environment.length){
+    const c = el('div',{cls:'con'});
+    c.appendChild(el('strong',{text:'Sensors'}));
+    c.appendChild(el('span',{cls:'pill', text:`${state.environment.length} deployed`}));
+    band.appendChild(c);
+  }
+  if(state.ttps.length){
+    const c = el('div',{cls:'con'});
+    c.appendChild(el('strong',{text:'TTPs'}));
+    c.appendChild(el('span',{cls:'pill', text:`${state.ttps.length} of 6`}));
+    band.appendChild(c);
+  }
+  // window/budget always visible from objective onward
+  if(state.step > 0){
+    const c = el('div',{cls:'con'});
+    c.appendChild(el('strong',{text:'Window'}));
+    c.appendChild(el('span',{cls:'pill', text:'5 days exec'}));
+    band.appendChild(c);
+  }
+}
+
+/* =====================================================================
+   TOAST
+===================================================================== */
+function toast({title='', body='', em=''}){
+  const t = el('div',{cls:'toast'});
+  t.appendChild(el('strong',{text:title}));
+  if(em) t.appendChild(el('em',{text:em}));
+  if(body) t.appendChild(document.createTextNode(body));
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>{
+    t.classList.add('gone');
+    setTimeout(()=>t.remove(), 300);
+  }, 2800);
+}
+
+/* =====================================================================
+   SECTION RENDERERS
+===================================================================== */
+const $main = document.getElementById('main');
+const $hdrTitle = document.getElementById('hdr-title');
+const $btnBack = document.getElementById('btn-back');
+const $btnNext = document.getElementById('btn-next');
+
+function renderSection(){
+  clear($main);
+  $hdrTitle.textContent = STEPS[state.step].title;
+  ({
+    0: renderBriefing,
+    1: renderObjective,
+    2: renderRoe,
+    3: renderRoles,
+    4: renderEnvironment,
+    5: renderTtps,
+    6: renderDetection,
+    7: renderReview,
+    8: renderScore,
+  })[state.step]();
+  $btnBack.style.visibility = state.step === 0 ? 'hidden' : 'visible';
+  if(state.step === STEPS.length - 1){
+    $btnNext.textContent = 'Restart Lab';
+    $btnNext.disabled = false;
+  } else if(state.step === STEPS.length - 2){
+    $btnNext.textContent = 'Reveal Profile Analysis';
+  } else {
+    $btnNext.textContent = 'Continue';
+  }
+  // Hide constraints band on briefing — nothing has been decided yet
+  document.getElementById('constraints').style.display = state.step === 0 ? 'none' : '';
+}
+
+/* ===== SECTION 0 — BRIEFING ===== */
+function renderBriefing(){
+  const z = el('div',{cls:'full-zone'});
+  z.appendChild(el('span',{cls:'stamp', text:'Section 01 · Operational Briefing'}));
+  const h = el('h1');
+  h.appendChild(document.createTextNode('Plan a purple-team engagement against '));
+  h.appendChild(el('em',{text:'Crimson Viper'}));
+  h.appendChild(document.createTextNode('.'));
+  z.appendChild(h);
+
+  const lede = el('p',{cls:'lede'});
+  lede.appendChild(document.createTextNode('You are the engagement lead at NOVA Corporation. The CISO has signed off. You have '));
+  lede.appendChild(el('em',{text:'one week of planning, then five days of execution'}));
+  lede.appendChild(document.createTextNode(' to validate that the SOC can detect Crimson Viper inside 24 hours of initial compromise. Eight decisions stand between you and the field.'));
+  z.appendChild(lede);
+
+  const sc = el('div',{cls:'scenario-card'});
+  sc.appendChild(el('div',{cls:'label', text:'Scenario'}));
+  const body = el('div',{cls:'body'});
+  const p1 = el('p');
+  p1.appendChild(el('strong',{text:'NOVA Corporation'}));
+  p1.appendChild(document.createTextNode(' — mid-large fintech, ~3,200 employees, hybrid Azure + on-prem AD, M365 E5, Elastic SIEM. Recent IPO; crypto custody launches in 6 months. PCI-DSS, SOC 2, GDPR, NYDFS 23 NYCRR 500.'));
+  body.appendChild(p1);
+  const p2 = el('p',{attrs:{style:'margin-top:8px'}});
+  p2.appendChild(el('strong',{text:'Crimson Viper'}));
+  p2.appendChild(document.createTextNode(' — financially motivated, APT-adjacent. Signature: spearphishing + AiTM MFA bypass, Kerberos abuse, cloud-staged exfiltration via HTTPS. Tempo: 3–5 days from initial access to exfil. Recent drift toward cloud identity attacks (consent grants, OAuth token theft).'));
+  body.appendChild(p2);
+  sc.appendChild(body);
+  z.appendChild(sc);
+
+  // Game rules
+  z.appendChild(el('div',{cls:'section-lbl', text:'Rules of the Game · 5 things to know'}));
+  const rules = el('div',{cls:'rules-grid'});
+  [
+    ['01','Decisions cascade.','Each section locks constraints that affect later sections. Pick a tight team and you may not be able to execute every TTP.'],
+    ['02','Some options are traps.','Plausible-looking picks can be off-actor, RoE-violating, or budget-busting. The brief tells you what fits.'],
+    ['03','You see the score moving.','The Intel Fit gauge updates live across sections — but the breakdown is hidden until the final Scorecard.'],
+    ['04','Cross-section penalties exist.','Picking a cloud TTP without a cloud-sec engineer? Picking a destructive TTP after committing to "no destruction"? Those land in the final reveal.'],
+    ['05','Retries allowed.','Use Back to revisit any section. Your picks persist in this browser.'],
+  ].forEach(([n, t, d])=>{
+    const c = el('div',{cls:'rule-cell'});
+    c.appendChild(el('div',{cls:'num', text:n}));
+    const b = el('div',{cls:'body'});
+    b.appendChild(el('h4',{text:t}));
+    b.appendChild(el('p',{text:d}));
+    c.appendChild(b);
+    rules.appendChild(c);
+  });
+  z.appendChild(rules);
+
+  $main.appendChild(z);
+  $btnNext.disabled = false;
+  $btnNext.textContent = 'Begin · Section 02';
+}
+
+/* ===== SECTION 1 — OBJECTIVE ===== */
+function renderObjective(){
+  const wrap = el('div',{attrs:{style:'display:contents'}});
+  const brief = el('aside',{cls:'brief'});
+  brief.appendChild(el('div',{cls:'brief-eyebrow', text:'Decision · 1 of 1'}));
+  const h = el('h2',{text:'What does success look like?'});
+  brief.appendChild(h);
+  const sub = el('p',{cls:'brief-sub', text:'Pick the engagement objective. The wrong wording locks you into the wrong scope for everything that follows.'});
+  brief.appendChild(sub);
+  const ib = el('div',{cls:'intel-block'});
+  ib.appendChild(el('div',{cls:'lbl', text:'A good objective is…'}));
+  const ul = el('ul',{cls:'intel-list'});
+  ['Concrete (what observable thing changes)','Measurable (a number, a window, a count)','Tied to the actor profile','Inside team capability'].forEach(t=>{
+    ul.appendChild(el('li',{text:t}));
+  });
+  ib.appendChild(ul);
+  brief.appendChild(ib);
+  brief.appendChild(el('p',{cls:'brief-hint', text:'The system will not tell you which is right. Read each one carefully — most look reasonable.'}));
+
+  const work = el('section',{cls:'workzone'});
+  const head = el('div',{cls:'zone-head'});
+  const h1 = el('h1');
+  h1.appendChild(el('span',{cls:'num', text:'SECTION 02 — OBJECTIVE'}));
+  h1.appendChild(document.createTextNode('Pick one.'));
+  head.appendChild(h1);
+  work.appendChild(head);
+
+  const grid = el('div',{cls:'grid', attrs:{style:'grid-template-columns:1fr'}});
+  OBJECTIVES.forEach(o=>{
+    const c = el('div',{cls:'card' + (state.objective===o.id ? ' selected' : ''), data:{id:o.id}});
+    c.appendChild(el('span',{cls:'sel-tag', text:'◉ SELECTED'}));
+    c.appendChild(el('div',{cls:'card-id', text:'OPTION ' + o.id}));
+    c.appendChild(el('div',{cls:'card-name', text:o.label}));
+    c.appendChild(el('div',{cls:'card-desc', text:o.desc}));
+    c.addEventListener('click', ()=>{
+      state.objective = state.objective === o.id ? null : o.id;
+      persist();
+      renderSection();
+      renderConstraintsBand();
+      updateNextButton();
+      toast({title:'Recorded', em:'OPT ' + o.id, body:' set as engagement objective.'});
+    });
+    grid.appendChild(c);
+  });
+  work.appendChild(grid);
+
+  const right = el('aside',{cls:'loadout'});
+  right.appendChild(el('div',{cls:'section-lbl', text:'Decision Lock'}));
+  if(state.objective){
+    const o = OBJECTIVES.find(x=>x.id===state.objective);
+    const it = el('div',{cls:'lo-item'});
+    it.appendChild(el('span',{cls:'id', text:'OPT ' + o.id}));
+    it.appendChild(el('span',{cls:'nm', text:o.label}));
+    right.appendChild(it);
+  } else {
+    right.appendChild(el('div',{cls:'lo-empty', text:'No objective picked yet'}));
+  }
+
+  $main.appendChild(brief);
+  $main.appendChild(work);
+  $main.appendChild(right);
+}
+
+/* ===== SECTION 2 — ROE ===== */
+function renderRoe(){
+  const brief = el('aside',{cls:'brief'});
+  brief.appendChild(el('div',{cls:'brief-eyebrow', text:'Decision · multi-select'}));
+  brief.appendChild(el('h2',{text:'Set the Rules of Engagement.'}));
+  brief.appendChild(el('p',{cls:'brief-sub', text:'You want enough structure to be safe, not so much that you can\'t actually run the engagement.'}));
+  const ib = el('div',{cls:'intel-block'});
+  ib.appendChild(el('div',{cls:'lbl', text:'Pick 5 clauses'}));
+  const ul = el('ul',{cls:'intel-list'});
+  ['3 required for a NYDFS-aligned engagement','Some clauses are reasonable additions','One or two are legal hazards','One or two cripple the timeline'].forEach(t=>{
+    ul.appendChild(el('li',{text:t}));
+  });
+  ib.appendChild(ul);
+  brief.appendChild(ib);
+
+  const work = el('section',{cls:'workzone'});
+  const head = el('div',{cls:'zone-head'});
+  const h1 = el('h1');
+  h1.appendChild(el('span',{cls:'num', text:'SECTION 03 — RULES OF ENGAGEMENT'}));
+  h1.appendChild(document.createTextNode('Pick 5 clauses.'));
+  head.appendChild(h1);
+  work.appendChild(head);
+
+  const grid = el('div',{cls:'grid'});
+  ROE_CLAUSES.forEach(c=>{
+    const card = el('div',{cls:'card' + (state.roe.includes(c.id) ? ' selected' : ''), data:{id:c.id}});
+    card.appendChild(el('span',{cls:'sel-tag', text:'◉ SELECTED'}));
+    card.appendChild(el('div',{cls:'card-id', text:c.id.toUpperCase()}));
+    card.appendChild(el('div',{cls:'card-name', text:c.label}));
+    const meta = el('div',{cls:'card-meta'});
+    meta.appendChild(el('span',{cls:'tag', text:'CLAUSE'}));
+    card.appendChild(meta);
+    card.addEventListener('click', ()=>{
+      const i = state.roe.indexOf(c.id);
+      if(i>=0) state.roe.splice(i,1);
+      else if(state.roe.length < 5) state.roe.push(c.id);
+      else { toast({title:'Slot limit', body:'Drop one before adding another.'}); return; }
+      persist();
+      renderSection();
+      renderConstraintsBand();
+      updateNextButton();
+    });
+    grid.appendChild(card);
+  });
+  work.appendChild(grid);
+
+  const right = el('aside',{cls:'loadout'});
+  right.appendChild(el('div',{cls:'lo-head'}));
+  const head2 = right.firstChild;
+  const div = el('div');
+  div.appendChild(el('div',{cls:'lbl', text:'Loadout'}));
+  div.appendChild(el('div',{cls:'count', attrs:{style:'font-family:var(--display);font-weight:800;font-size:36px;letter-spacing:-.035em;font-variant-numeric:tabular-nums;color:var(--ink)'}}));
+  const cnt = div.querySelector('.count');
+  const em = el('em',{text:String(state.roe.length).padStart(2,'0'), attrs:{style:'color:var(--purple);font-style:normal'}});
+  cnt.appendChild(em);
+  cnt.appendChild(document.createTextNode(' / 5'));
+  head2.appendChild(div);
+  if(state.roe.length === 0){
+    right.appendChild(el('div',{cls:'lo-empty', text:'No clauses selected'}));
+  } else {
+    state.roe.forEach(id=>{
+      const c = ROE_CLAUSES.find(x=>x.id===id);
+      const it = el('div',{cls:'lo-item'});
+      it.appendChild(el('span',{cls:'id', text:c.id.toUpperCase()}));
+      it.appendChild(el('span',{cls:'nm', text:c.label}));
+      const x = el('span',{cls:'x', text:'×'});
+      x.addEventListener('click', e=>{ e.stopPropagation();
+        state.roe = state.roe.filter(r=>r!==id);
+        persist(); renderSection(); renderConstraintsBand(); updateNextButton();
+      });
+      it.appendChild(x);
+      right.appendChild(it);
+    });
+  }
+
+  $main.appendChild(brief);
+  $main.appendChild(work);
+  $main.appendChild(right);
+}
+
+/* ===== SECTION 3 — ROLES ===== */
+function renderRoles(){
+  const brief = el('aside',{cls:'brief'});
+  brief.appendChild(el('div',{cls:'brief-eyebrow', text:'Decision · multi-select'}));
+  brief.appendChild(el('h2',{text:'Hire your team.'}));
+  brief.appendChild(el('p',{cls:'brief-sub', text:'5-day engagement. FTE budget covers daily rates × 5 days. Pick 4–6 people. Skills you skip become gaps you can\'t cover later.'}));
+  const ib = el('div',{cls:'intel-block'});
+  ib.appendChild(el('div',{cls:'lbl', text:'Skill checklist'}));
+  const ul = el('ul',{cls:'intel-list'});
+  ['Red — at least one','Detection — at least one','CTI — for actor profiling','Admin — for engagement coordination'].forEach(t=>ul.appendChild(el('li',{text:t})));
+  ib.appendChild(ul);
+  brief.appendChild(ib);
+  const ib2 = el('div',{cls:'intel-block warn'});
+  ib2.appendChild(el('div',{cls:'lbl', text:'Watch the budget'}));
+  ib2.appendChild(el('p',{attrs:{style:'font-family:var(--mono);font-size:11px;color:var(--ink-2);line-height:1.5'}, text:`FTE budget: $${ROLES_BUDGET_TOTAL.toLocaleString()} for 5 days.`}));
+  brief.appendChild(ib2);
+
+  const work = el('section',{cls:'workzone'});
+  const head = el('div',{cls:'zone-head'});
+  const h1 = el('h1');
+  h1.appendChild(el('span',{cls:'num', text:'SECTION 04 — TEAM COMPOSITION'}));
+  h1.appendChild(document.createTextNode('Pick 4–6 roles.'));
+  head.appendChild(h1);
+  work.appendChild(head);
+
+  const grid = el('div',{cls:'grid'});
+  ROLES_POOL.forEach(r=>{
+    const card = el('div',{cls:'card' + (state.roles.includes(r.id) ? ' selected' : ''), data:{id:r.id}});
+    card.appendChild(el('span',{cls:'sel-tag', text:'◉ HIRED'}));
+    card.appendChild(el('div',{cls:'card-id', text:r.id.toUpperCase()}));
+    card.appendChild(el('div',{cls:'card-name', text:r.name}));
+    const meta = el('div',{cls:'card-meta'});
+    meta.appendChild(el('span',{cls:'tag cost', text:`$${r.cost}/d × 5d = $${(r.cost*5/1000).toFixed(1)}K`}));
+    r.skills.forEach(s=>meta.appendChild(el('span',{cls:'tag skill' + (s==='cloud'?' role-cloud':''), text:s})));
+    card.appendChild(meta);
+    card.addEventListener('click', ()=>{
+      const i = state.roles.indexOf(r.id);
+      if(i>=0) state.roles.splice(i,1);
+      else if(state.roles.length < 6) state.roles.push(r.id);
+      else { toast({title:'Team full', body:'Drop someone first or proceed.'}); return; }
+      persist(); renderSection(); renderConstraintsBand(); updateNextButton();
+    });
+    grid.appendChild(card);
+  });
+  work.appendChild(grid);
+
+  // Right panel: budget consumption
+  const totalCost = state.roles.reduce((a,id)=>{
+    const r = ROLES_POOL.find(x=>x.id===id); return a + (r?r.cost*5:0);
+  }, 0);
+  const skills = new Set(state.roles.flatMap(id => (ROLES_POOL.find(r=>r.id===id)||{skills:[]}).skills));
+  const right = el('aside',{cls:'loadout'});
+  right.appendChild(el('div',{cls:'section-lbl', text:'Budget · FTE'}));
+  const list = el('div',{cls:'con-list'});
+  const pct = (totalCost/ROLES_BUDGET_TOTAL)*100;
+  const sev = pct > 100 ? 'bad' : pct > 80 ? 'warn' : '';
+  const r1 = el('div',{cls:'con-live'});
+  const h1d = el('div',{cls:'head'});
+  h1d.appendChild(el('span',{cls:'lbl', text:'Spend'}));
+  h1d.appendChild(el('span',{cls:'val ' + sev, text:`$${(totalCost/1000).toFixed(1)}K / $${(ROLES_BUDGET_TOTAL/1000).toFixed(0)}K`}));
+  r1.appendChild(h1d);
+  const bar = el('div',{cls:'con-bar'});
+  const fill = el('div',{cls:'con-bar-fill ' + sev}); fill.style.width = Math.min(100,pct)+'%';
+  bar.appendChild(fill); r1.appendChild(bar);
+  r1.appendChild(el('div',{cls:'con-meta ' + sev, text: pct>100?'over budget':`${Math.round(pct)}% of FTE budget`}));
+  list.appendChild(r1);
+  right.appendChild(list);
+
+  right.appendChild(el('div',{cls:'section-lbl', text:'Skill Coverage'}));
+  const skillBox = el('div',{cls:'con-list'});
+  ['red','det','cti','admin','cloud','legal','ir'].forEach(skill=>{
+    const has = skills.has(skill);
+    const r = el('div',{cls:'con-live'});
+    const h = el('div',{cls:'head'});
+    h.appendChild(el('span',{cls:'lbl', text:skill}));
+    h.appendChild(el('span',{cls:'val ' + (has?'':'bad'), text: has?'✓':'—'}));
+    r.appendChild(h);
+    skillBox.appendChild(r);
+  });
+  right.appendChild(skillBox);
+
+  $main.appendChild(brief);
+  $main.appendChild(work);
+  $main.appendChild(right);
+}
+
+/* ===== SECTION 4 — ENVIRONMENT ===== */
+function renderEnvironment(){
+  const brief = el('aside',{cls:'brief'});
+  brief.appendChild(el('div',{cls:'brief-eyebrow', text:'Decision · multi-select'}));
+  brief.appendChild(el('h2',{text:'Place your sensors.'}));
+  brief.appendChild(el('p',{cls:'brief-sub', text:'NOVA\'s environment has multiple zones. Pick the monitoring you need to observe a Crimson Viper kill chain end-to-end. The cheapest sensor that covers a critical zone is usually the right answer. Redundancy and irrelevant sensors waste budget.'}));
+  const ib = el('div',{cls:'intel-block'});
+  ib.appendChild(el('div',{cls:'lbl', text:'Critical zones'}));
+  const ul = el('ul',{cls:'intel-list'});
+  ['Endpoint — workstations are the entry point','Server — privileged access lives here','Perimeter — initial access traverses email','Identity — Kerberos abuse is a CV signature'].forEach(t=>ul.appendChild(el('li',{text:t})));
+  ib.appendChild(ul);
+  brief.appendChild(ib);
+
+  const work = el('section',{cls:'workzone'});
+  const head = el('div',{cls:'zone-head'});
+  const h1 = el('h1');
+  h1.appendChild(el('span',{cls:'num', text:'SECTION 05 — MONITORING ENVIRONMENT'}));
+  h1.appendChild(document.createTextNode('Pick the sensors.'));
+  head.appendChild(h1);
+  work.appendChild(head);
+
+  const grid = el('div',{cls:'grid'});
+  ENVIRONMENT_SENSORS.forEach(s=>{
+    const card = el('div',{cls:'card' + (state.environment.includes(s.id) ? ' selected' : ''), data:{id:s.id}});
+    card.appendChild(el('span',{cls:'sel-tag', text:'◉ DEPLOYED'}));
+    card.appendChild(el('div',{cls:'card-id', text:s.id.toUpperCase()}));
+    card.appendChild(el('div',{cls:'card-name', text:s.name}));
+    const meta = el('div',{cls:'card-meta'});
+    meta.appendChild(el('span',{cls:'tag tactic', text:s.zone}));
+    meta.appendChild(el('span',{cls:'tag cost', text:`$${(s.cost/1000).toFixed(1)}K`}));
+    card.appendChild(meta);
+    card.addEventListener('click', ()=>{
+      const i = state.environment.indexOf(s.id);
+      if(i>=0) state.environment.splice(i,1);
+      else if(state.environment.length < 7) state.environment.push(s.id);
+      else { toast({title:'Sensor cap', body:'7 deployed already.'}); return; }
+      persist(); renderSection(); renderConstraintsBand(); updateNextButton();
+    });
+    grid.appendChild(card);
+  });
+  work.appendChild(grid);
+
+  const totalCost = state.environment.reduce((a,id)=>{
+    const s = ENVIRONMENT_SENSORS.find(x=>x.id===id); return a + (s?s.cost:0);
+  }, 0);
+  const right = el('aside',{cls:'loadout'});
+  right.appendChild(el('div',{cls:'section-lbl', text:'Sensor Budget'}));
+  const list = el('div',{cls:'con-list'});
+  const pct = (totalCost/ENV_BUDGET)*100;
+  const sev = pct > 100 ? 'bad' : pct > 80 ? 'warn' : '';
+  const r1 = el('div',{cls:'con-live'});
+  const h1d = el('div',{cls:'head'});
+  h1d.appendChild(el('span',{cls:'lbl', text:'Spend'}));
+  h1d.appendChild(el('span',{cls:'val ' + sev, text:`$${(totalCost/1000).toFixed(1)}K / $${(ENV_BUDGET/1000).toFixed(0)}K`}));
+  r1.appendChild(h1d);
+  const bar = el('div',{cls:'con-bar'});
+  const fill = el('div',{cls:'con-bar-fill ' + sev}); fill.style.width = Math.min(100,pct)+'%';
+  bar.appendChild(fill); r1.appendChild(bar);
+  r1.appendChild(el('div',{cls:'con-meta ' + sev, text: pct>100?'over budget':`${Math.round(pct)}% of sensor budget`}));
+  list.appendChild(r1);
+  right.appendChild(list);
+
+  right.appendChild(el('div',{cls:'section-lbl', text:'Critical Zones'}));
+  const zoneBox = el('div',{cls:'con-list'});
+  const picked = state.environment.map(id => ENVIRONMENT_SENSORS.find(x=>x.id===id));
+  ['endpoint','server','perimeter','identity'].forEach(zone=>{
+    const has = picked.some(p => p && p.zone === zone);
+    const r = el('div',{cls:'con-live'});
+    const h = el('div',{cls:'head'});
+    h.appendChild(el('span',{cls:'lbl', text:zone}));
+    h.appendChild(el('span',{cls:'val ' + (has?'':'bad'), text: has?'✓':'—'}));
+    r.appendChild(h);
+    zoneBox.appendChild(r);
+  });
+  right.appendChild(zoneBox);
+
+  $main.appendChild(brief);
+  $main.appendChild(work);
+  $main.appendChild(right);
+}
+
+/* ===== SECTION 5 — TTPS ===== */
+function renderTtps(){
+  const brief = el('aside',{cls:'brief'});
+  brief.appendChild(el('div',{cls:'brief-eyebrow'}));
+  const eyebrow = brief.firstChild;
+  eyebrow.appendChild(el('span',{cls:'dot-pulse'})); eyebrow.appendChild(el('span',{text:'Threat Profile · Dossier'}));
+  const h2 = el('h2');
+  h2.appendChild(el('em',{text:'Crimson Viper'}));
+  h2.appendChild(document.createTextNode(' — financially motivated, APT-adjacent.'));
+  brief.appendChild(h2);
+  brief.appendChild(el('p',{cls:'brief-sub', text:'Active 2018+. 3–5 day campaigns. Spearphishing, Kerberos abuse, cloud-staged exfil. Recent drift to cloud identity.'}));
+
+  const dg = el('div',{cls:'dossier-grid'});
+  [['Aliases','CV-2018, "Garnet Adder"'],['Tempo','3–5 days IA→exfil'],['Targeting','Fintech / crypto'],['Geo','East-EU nexus']].forEach(([k,v])=>{
+    const c = el('div',{cls:'dossier-cell'});
+    c.appendChild(el('div',{cls:'k', text:k}));
+    c.appendChild(el('div',{cls:'v', text:v}));
+    dg.appendChild(c);
+  });
+  brief.appendChild(dg);
+
+  const ib = el('div',{cls:'intel-block'});
+  ib.appendChild(el('div',{cls:'lbl', text:'Tradecraft on file'}));
+  const ul = el('ul',{cls:'intel-list'});
+  ['Spearphishing + AiTM MFA bypass','Kerberos / Valid Accounts','PowerShell on-host','Service-exploit privilege escalation','Cloud-staged exfil via HTTPS','Account discovery via built-ins'].forEach(t=>ul.appendChild(el('li',{text:t})));
+  ib.appendChild(ul);
+  brief.appendChild(ib);
+
+  const ib2 = el('div',{cls:'intel-block warn'});
+  ib2.appendChild(el('div',{cls:'lbl', text:'Recent drift · 90d'}));
+  const ul2 = el('ul',{cls:'intel-list'});
+  ['OAuth consent grants','Cloud account abuse'].forEach(t=>ul2.appendChild(el('li',{text:t})));
+  ib2.appendChild(ul2);
+  brief.appendChild(ib2);
+  brief.appendChild(el('p',{cls:'brief-hint', text:'Pick 6 TTPs aligned to this profile and the constraints you set above. Some library entries are tradecraft from other actors.'}));
+
+  const work = el('section',{cls:'workzone'});
+  const head = el('div',{cls:'zone-head'});
+  const h1 = el('h1');
+  h1.appendChild(el('span',{cls:'num', text:'SECTION 06 — ADVERSARY ACTIVITIES'}));
+  h1.appendChild(document.createTextNode('Pick 6 TTPs.'));
+  head.appendChild(h1);
+  work.appendChild(head);
+
+  const grid = el('div',{cls:'grid'});
+  TTPS.forEach(t=>{
+    const card = el('div',{cls:'card' + (state.ttps.includes(t.id) ? ' selected' : ''), data:{id:t.id}});
+    card.appendChild(el('span',{cls:'sel-tag', text:'◉ SELECTED'}));
+    card.appendChild(el('div',{cls:'card-id', text:t.id}));
+    card.appendChild(el('div',{cls:'card-name', text:t.name}));
+    const meta = el('div',{cls:'card-meta'});
+    const tn = TACTICS.find(x=>x[0]===t.tactic);
+    meta.appendChild(el('span',{cls:'tag tactic', text: tn ? tn[1] : t.tactic}));
+    meta.appendChild(el('span',{cls:'tag risk-' + t.risk, text:t.risk}));
+    card.appendChild(meta);
+    card.addEventListener('click', ()=>{
+      const i = state.ttps.indexOf(t.id);
+      if(i>=0){
+        state.ttps.splice(i,1);
+        delete state.detectionMap[t.id];
+      } else if(state.ttps.length < 6){
+        state.ttps.push(t.id);
+      } else {
+        toast({title:'Loadout full', body:'6 TTPs already selected.'}); return;
+      }
+      persist(); renderSection(); renderConstraintsBand(); updateNextButton();
+    });
+    grid.appendChild(card);
+  });
+  work.appendChild(grid);
+
+  const right = el('aside',{cls:'loadout'});
+  right.appendChild(el('div',{cls:'section-lbl', text:`Loadout · ${state.ttps.length} of 6`}));
+  if(state.ttps.length === 0){
+    right.appendChild(el('div',{cls:'lo-empty', text:'No TTPs selected'}));
+  } else {
+    state.ttps.forEach(id=>{
+      const t = TTPS.find(x=>x.id===id);
+      const it = el('div',{cls:'lo-item'});
+      it.appendChild(el('span',{cls:'id', text:t.id}));
+      it.appendChild(el('span',{cls:'nm', text:t.name}));
+      const x = el('span',{cls:'x', text:'×'});
+      x.addEventListener('click', e=>{ e.stopPropagation();
+        state.ttps = state.ttps.filter(r=>r!==id);
+        delete state.detectionMap[id];
+        persist(); renderSection(); renderConstraintsBand(); updateNextButton();
+      });
+      it.appendChild(x);
+      right.appendChild(it);
+    });
+  }
+
+  right.appendChild(el('div',{cls:'section-lbl', text:'ATT&CK Coverage'}));
+  const cov = el('div',{cls:'cov-grid'});
+  const hit = new Set(state.ttps.map(id => TTPS.find(t=>t.id===id).tactic));
+  TACTICS.forEach(([k,name])=>{
+    cov.appendChild(el('div',{cls:'cov' + (hit.has(k)?' hit':''), text:k, title:name}));
+  });
+  right.appendChild(cov);
+
+  // budget panel
+  const totalHours = state.ttps.reduce((a,id)=>{ const t=TTPS.find(x=>x.id===id); return a+(t?t.hours:0); }, 0);
+  const totalCost  = state.ttps.reduce((a,id)=>{ const t=TTPS.find(x=>x.id===id); return a+(t?t.cost:0); }, 0);
+  right.appendChild(el('div',{cls:'section-lbl', text:'Window & Budget'}));
+  const list = el('div',{cls:'con-list'});
+  [['Window · 5d', totalHours, WINDOW_HOURS, 'h'],
+   ['Budget',     totalCost, TTP_BUDGET, '$']].forEach(([lbl, used, max, unit])=>{
+    const pct = (used/max)*100;
+    const sev = pct > 100 ? 'bad' : pct > 80 ? 'warn' : '';
+    const r = el('div',{cls:'con-live'});
+    const h = el('div',{cls:'head'});
+    h.appendChild(el('span',{cls:'lbl', text:lbl}));
+    const v = unit==='$' ? `$${(used/1000).toFixed(1)}K / $${(max/1000).toFixed(0)}K` : `${used}h / ${max}h`;
+    h.appendChild(el('span',{cls:'val '+sev, text:v}));
+    r.appendChild(h);
+    const bar = el('div',{cls:'con-bar'});
+    const fill = el('div',{cls:'con-bar-fill '+sev}); fill.style.width = Math.min(100,pct)+'%';
+    bar.appendChild(fill); r.appendChild(bar);
+    list.appendChild(r);
+  });
+  right.appendChild(list);
+
+  $main.appendChild(brief);
+  $main.appendChild(work);
+  $main.appendChild(right);
+}
+
+/* ===== SECTION 6 — DETECTION ===== */
+function renderDetection(){
+  const brief = el('aside',{cls:'brief'});
+  brief.appendChild(el('div',{cls:'brief-eyebrow', text:'Decision · per-TTP mapping'}));
+  brief.appendChild(el('h2',{text:'Map detections to TTPs.'}));
+  brief.appendChild(el('p',{cls:'brief-sub', text:'For each TTP you picked, choose the detection technologies that would catch it. Only the detections whose sensors you actually deployed in Section 05 are shown. A few are red herrings — they look professional but cover nothing relevant.'}));
+  const ib = el('div',{cls:'intel-block'});
+  ib.appendChild(el('div',{cls:'lbl', text:'Detection pool (filtered by your environment)'}));
+  const ul = el('ul',{cls:'intel-list'});
+  const avail = availableDetections(state);
+  avail.forEach(d=>ul.appendChild(el('li',{text:`${d.name}${d.covers.length ? '' : ' (?)'}`})));
+  if(avail.length === 0) ul.appendChild(el('li',{text:'(no sensors deployed — go back to Section 05)'}));
+  ib.appendChild(ul);
+  brief.appendChild(ib);
+
+  const work = el('section',{cls:'workzone'});
+  const head = el('div',{cls:'zone-head'});
+  const h1 = el('h1');
+  h1.appendChild(el('span',{cls:'num', text:'SECTION 07 — DETECTION MAPPING'}));
+  h1.appendChild(document.createTextNode('Map your TTPs.'));
+  head.appendChild(h1);
+  work.appendChild(head);
+
+  if(state.ttps.length === 0){
+    work.appendChild(el('p',{cls:'brief-sub', text:'No TTPs were picked. Go back to Section 06.'}));
+  } else {
+    state.ttps.forEach(id=>{
+      const t = TTPS.find(x=>x.id===id);
+      const row = el('div',{cls:'det-row'});
+      const head = el('div',{cls:'det-ttp'});
+      const left = el('div');
+      left.appendChild(el('span',{cls:'id', text:t.id}));
+      left.appendChild(document.createTextNode(' '));
+      left.appendChild(el('span',{cls:'nm', text:t.name}));
+      head.appendChild(left);
+      const ct = (state.detectionMap[id] || []).length;
+      head.appendChild(el('span',{cls:'ct', text:`${ct} mapped`}));
+      row.appendChild(head);
+      const opts = el('div',{cls:'det-options'});
+      availableDetections(state).forEach(d=>{
+        const sel = (state.detectionMap[id] || []).includes(d.id);
+        const o = el('div',{cls:'det-opt' + (sel?' selected':''), text:d.name});
+        o.addEventListener('click', ()=>{
+          if(!state.detectionMap[id]) state.detectionMap[id] = [];
+          const arr = state.detectionMap[id];
+          const idx = arr.indexOf(d.id);
+          if(idx>=0) arr.splice(idx,1);
+          else arr.push(d.id);
+          // Preserve scroll position across the re-render so the user
+          // doesn't get bounced to top after each detection toggle.
+          const wz = document.querySelector('.workzone');
+          const wzScroll = wz ? wz.scrollTop : 0;
+          const winScroll = window.scrollY;
+          persist(); renderSection(); updateNextButton();
+          requestAnimationFrame(() => {
+            const wz2 = document.querySelector('.workzone');
+            if(wz2) wz2.scrollTop = wzScroll;
+            window.scrollTo(0, winScroll);
+          });
+        });
+        opts.appendChild(o);
+      });
+      row.appendChild(opts);
+      work.appendChild(row);
+    });
+  }
+
+  const right = el('aside',{cls:'loadout'});
+  right.appendChild(el('div',{cls:'section-lbl', text:'Mapping Status'}));
+  const list = el('div',{cls:'con-list'});
+  state.ttps.forEach(id=>{
+    const t = TTPS.find(x=>x.id===id);
+    const techIds = state.detectionMap[id] || [];
+    const hasCovers = techIds.some(tid => {
+      const d = DETECTIONS.find(x=>x.id===tid); return d && d.covers.includes(t.tactic);
+    });
+    const r = el('div',{cls:'con-live'});
+    const h = el('div',{cls:'head'});
+    h.appendChild(el('span',{cls:'lbl', text:t.id}));
+    h.appendChild(el('span',{cls:'val ' + (techIds.length===0 ? 'bad' : hasCovers ? '' : 'warn'), text: techIds.length===0 ? '— none' : hasCovers ? `${techIds.length} ✓` : `${techIds.length} ?`}));
+    r.appendChild(h);
+    list.appendChild(r);
+  });
+  right.appendChild(list);
+
+  $main.appendChild(brief);
+  $main.appendChild(work);
+  $main.appendChild(right);
+}
+
+/* ===== SECTION 7 — REVIEW ===== */
+function renderReview(){
+  const z = el('div',{cls:'scorecard full'});
+  const head = el('div',{attrs:{style:'display:flex;flex-direction:column;gap:6px;margin-bottom:18px'}});
+  head.appendChild(el('span',{cls:'crest-id', text:'Section 08 · Final Review'}));
+  head.appendChild(el('h1',{text:'Your engagement plan, complete.', attrs:{style:'font-family:var(--display);font-weight:800;font-size:42px;letter-spacing:-.03em;line-height:1'}}));
+  z.appendChild(head);
+
+  const callout = el('div',{cls:'review-callout'});
+  callout.appendChild(el('strong',{text:'Last decision screen'}));
+  const body = el('div');
+  body.appendChild(document.createTextNode('Below is every decision you made. The next click reveals the '));
+  body.appendChild(el('em',{text:'Profile Analysis'}));
+  body.appendChild(document.createTextNode(' — your Intel Fit score, per-section breakdown, cross-section penalties, and recommendations. There is no going back from there without restarting.'));
+  callout.appendChild(body);
+  z.appendChild(callout);
+
+  const grid = el('div',{cls:'review-grid'});
+
+  // Objective
+  if(state.objective){
+    const o = OBJECTIVES.find(x=>x.id===state.objective);
+    const c = el('div',{cls:'review-card'});
+    c.appendChild(el('h5',{text:'02 · Engagement Objective'}));
+    c.appendChild(el('div',{cls:'v-main', text:`OPT ${o.id} — ${o.label}`}));
+    c.appendChild(el('div',{cls:'meta', text:o.desc}));
+    grid.appendChild(c);
+  }
+
+  // RoE
+  const c2 = el('div',{cls:'review-card'});
+  c2.appendChild(el('h5',{text:'03 · Rules of Engagement · ' + state.roe.length + ' clauses'}));
+  const ul2 = el('ul');
+  state.roe.forEach(id=>{
+    const cl = ROE_CLAUSES.find(x=>x.id===id); if(!cl) return;
+    ul2.appendChild(el('li',{text:cl.label}));
+  });
+  c2.appendChild(ul2);
+  grid.appendChild(c2);
+
+  // Roles
+  const c3 = el('div',{cls:'review-card'});
+  const totalCost = state.roles.reduce((a,id)=>{const r=ROLES_POOL.find(x=>x.id===id); return a+(r?r.cost*5:0);}, 0);
+  c3.appendChild(el('h5',{text:'04 · Team · ' + state.roles.length + ' hired · $' + (totalCost/1000).toFixed(1) + 'K'}));
+  const ul3 = el('ul');
+  state.roles.forEach(id=>{
+    const r = ROLES_POOL.find(x=>x.id===id); if(!r) return;
+    ul3.appendChild(el('li',{text:r.name + ' (' + r.skills.join(', ') + ')'}));
+  });
+  c3.appendChild(ul3);
+  grid.appendChild(c3);
+
+  // Environment
+  const c4 = el('div',{cls:'review-card'});
+  const envCost = state.environment.reduce((a,id)=>{const s=ENVIRONMENT_SENSORS.find(x=>x.id===id); return a+(s?s.cost:0);}, 0);
+  c4.appendChild(el('h5',{text:'05 · Sensors · ' + state.environment.length + ' deployed · $' + (envCost/1000).toFixed(1) + 'K'}));
+  const ul4 = el('ul');
+  state.environment.forEach(id=>{
+    const s = ENVIRONMENT_SENSORS.find(x=>x.id===id); if(!s) return;
+    ul4.appendChild(el('li',{text:s.name + ' (' + s.zone + ')'}));
+  });
+  c4.appendChild(ul4);
+  grid.appendChild(c4);
+
+  // TTPs
+  const c5 = el('div',{cls:'review-card'});
+  c5.appendChild(el('h5',{text:'06 · Adversary Activities · ' + state.ttps.length + ' TTPs'}));
+  const ul5 = el('ul');
+  state.ttps.forEach(id=>{
+    const t = TTPS.find(x=>x.id===id); if(!t) return;
+    ul5.appendChild(el('li',{text:t.id + ' — ' + t.name}));
+  });
+  c5.appendChild(ul5);
+  grid.appendChild(c5);
+
+  // Detection
+  const c6 = el('div',{cls:'review-card'});
+  const totalMaps = Object.values(state.detectionMap).reduce((a,arr)=>a+(arr?arr.length:0), 0);
+  c6.appendChild(el('h5',{text:'07 · Detection · ' + totalMaps + ' mappings'}));
+  const ul6 = el('ul');
+  state.ttps.forEach(id=>{
+    const techs = (state.detectionMap[id] || []).map(d => DETECTIONS.find(x=>x.id===d)).filter(Boolean);
+    const t = TTPS.find(x=>x.id===id);
+    ul6.appendChild(el('li',{text:`${t.id}: ${techs.length ? techs.map(x=>x.name).join(', ') : '(none)'}`}));
+  });
+  c6.appendChild(ul6);
+  grid.appendChild(c6);
+
+  // Injects
+  if(state.injectQueue.length > 0){
+    const c7 = el('div',{cls:'review-card'});
+    const responded = state.injectQueue.filter(id => state.injectsResponded[id]).length;
+    c7.appendChild(el('h5',{text:'Injects · ' + responded + ' of ' + state.injectQueue.length + ' resolved'}));
+    const ul7 = el('ul');
+    state.injectQueue.forEach(injId=>{
+      const i = INJECTS.find(x=>x.id===injId); if(!i) return;
+      const optId = state.injectsResponded[injId];
+      const opt = optId ? i.options.find(o=>o.id===optId) : null;
+      ul7.appendChild(el('li',{text: i.title.split(' · ')[0] + ': ' + (opt ? opt.label.slice(0,90) : 'pending')}));
+    });
+    c7.appendChild(ul7);
+    grid.appendChild(c7);
+  }
+
+  z.appendChild(grid);
+  $main.appendChild(z);
+}
+
+/* ===== Helpers for Score ===== */
+function objectiveExplanation(s){
+  if(!s.objective) return 'No objective picked.';
+  const o = OBJECTIVES.find(x=>x.id===s.objective);
+  const head = `Earned ${o.score} of ${WEIGHTS.objective} pts. `;
+  if(o.score === 10) return head + 'Picked the concrete, measurable target tied to Crimson Viper’s actual tempo. The SOC can validate the engagement against an unambiguous bar (24h MTTD against a 3–5 day kill chain).';
+  if(o.score === 5)  return head + 'Compliance-first objective. PCI-DSS Req 11.4 is a real annual deliverable, but it does not exercise the SOC against an adversary kill chain — the engagement satisfies auditors without proving detection coverage.';
+  if(o.score === 4)  return head + 'Red-team mindset, not purple-team. Maximizing finding count rewards breadth over depth and disconnects the engagement from a specific adversary. Coverage validation against Crimson Viper is left unmeasured.';
+  if(o.score === 3)  return head + '"All attackers" is unmeasurable. The team cannot say at engagement end whether they succeeded — what counts as "all"? Hunt-style framing without a target produces no testable hypothesis.';
+  if(o.score === 2)  return head + 'Zero-day discovery is vulnerability research (fuzzing, reverse engineering, source review), not purple team. There is nothing to detect for a vulnerability that does not yet exist publicly, so the engagement loop has no Blue side.';
+  return head;
+}
+function roeExplanation(s){
+  const picked = s.roe.map(id=>ROE_CLAUSES.find(x=>x.id===id)).filter(Boolean);
+  const req = picked.filter(p=>p.type==='required').length;
+  const rec = picked.filter(p=>p.type==='recommended').length;
+  const trap = picked.filter(p=>p.type==='trap');
+  const restr = picked.filter(p=>p.type==='restrictive');
+  const allReq = ROE_CLAUSES.filter(c=>c.type==='required').length;
+  const parts = [];
+  parts.push(`${req}/${allReq} required clauses (+${req*3} pts)`);
+  if(rec) parts.push(`${rec} recommended (+${(rec*1.5).toFixed(1)} pts)`);
+  if(trap.length){
+    const names = trap.map(t=>t.label).join('; ');
+    parts.push(`${trap.length} trap clause${trap.length>1?'s':''} − ${names} (−${trap.reduce((a,t)=>a+t.cost,0)} pts)`);
+  }
+  if(restr.length){
+    parts.push(`${restr.length} over-restrictive clause${restr.length>1?'s':''} (−${restr.reduce((a,r)=>a+r.cost,0)} pts)`);
+  }
+  const tail = trap.length ? ' Trap clauses (e.g. monitoring without consent) carry legal/reputational risk and are heavily penalized.' :
+              restr.length ? ' Over-restrictive clauses (e.g. manual approval per action) bog the engagement down to the point where it cannot complete in window.' :
+              ' Strong RoE: required protections present, no over-restrictive or legally-risky clauses.';
+  return parts.join(' · ') + '.' + tail;
+}
+function rolesExplanation(s){
+  const picked = s.roles.map(id=>ROLES_POOL.find(x=>x.id===id)).filter(Boolean);
+  const reqHired = ROLES_POOL.filter(r=>r.required && s.roles.includes(r.id)).map(r=>r.name);
+  const reqMissing = ROLES_POOL.filter(r=>r.required && !s.roles.includes(r.id)).map(r=>r.name);
+  const cost = picked.reduce((a,r)=>a+r.cost*5, 0);
+  const sizeOK = picked.length >= 4 && picked.length <= 6;
+  const budgetOK = cost <= ROLES_BUDGET_TOTAL;
+  const parts = [
+    `${reqHired.length}/4 required roles covered (+${reqHired.length*2} pts)`,
+    `${sizeOK ? `team size ${picked.length} (4–6 sweet spot, +2 pts)` : `team size ${picked.length} (outside 4–6 band, no size bonus)`}`,
+    `${budgetOK ? `$${(cost/1000).toFixed(1)}K of $${(ROLES_BUDGET_TOTAL/1000).toFixed(0)}K FTE budget (+4 pts)` : `$${(cost/1000).toFixed(1)}K — over $${(ROLES_BUDGET_TOTAL/1000).toFixed(0)}K budget`}`,
+  ];
+  let tail = '';
+  if(reqMissing.length) tail = ` Missing: ${reqMissing.join(', ')} — required for engagement coordination, detection authoring, intel currency, or program management.`;
+  return parts.join(' · ') + '.' + tail;
+}
+function envExplanation(s){
+  const picked = s.environment.map(id=>ENVIRONMENT_SENSORS.find(x=>x.id===id)).filter(Boolean);
+  const crits = ENVIRONMENT_SENSORS.filter(e=>e.critical);
+  const critHit = crits.filter(c=>picked.some(p=>p.id===c.id));
+  const critMiss = crits.filter(c=>!picked.some(p=>p.id===c.id));
+  const tot = picked.reduce((a,e)=>a+e.cost, 0);
+  const budgetOK = tot <= ENV_BUDGET;
+  const red = picked.filter(p=>p.redundant);
+  const irrel = picked.filter(p=>p.irrelevant);
+  const parts = [
+    `${critHit.length}/4 critical zones covered (+${critHit.length*3} pts)`,
+    `${budgetOK ? `$${(tot/1000).toFixed(1)}K of $${(ENV_BUDGET/1000).toFixed(0)}K env budget (+3 pts)` : `$${(tot/1000).toFixed(1)}K over budget`}`,
+    `${(red.length===0 && irrel.length===0) ? 'no redundant/irrelevant sensors (+2 pts)' : 'discipline penalty applied'}`,
+  ];
+  let tail = '';
+  if(critMiss.length) tail += ` Missing critical: ${critMiss.map(c=>c.name).join(', ')} — these gate the detections you can map in Section 07.`;
+  if(red.length) tail += ` Redundant sensor (Duplicate Workstation EDR) wastes budget without adding coverage.`;
+  if(irrel.length) tail += ` Irrelevant sensor (OT/ICS Network Tap) does not apply to a fintech environment.`;
+  return parts.join(' · ') + '.' + tail;
+}
+function ttpsExplanation(s){
+  const picked = s.ttps.map(id=>TTPS.find(x=>x.id===id)).filter(Boolean);
+  const obs = picked.filter(t=>t.tag==='observed');
+  const oth = picked.filter(t=>t.tag==='other');
+  const noi = picked.filter(t=>t.tag==='noise');
+  const tactics = new Set(picked.map(t=>t.tactic));
+  const crits = ['IA','EX','CR','EXFIL'];
+  const critCovered = crits.filter(k=>tactics.has(k));
+  const critMissing = crits.filter(k=>!tactics.has(k));
+  const parts = [
+    `${obs.length} CV-observed (+${(obs.length*3.5).toFixed(1)} pts)`,
+    `${oth.length} other-actor TTPs (0 fit credit — burns a slot without scoring it)`,
+    `${noi.length} off-profile/noise TTPs (0 fit credit — and Crimson Viper would not run them)`,
+    `${critCovered.length}/4 critical kill-chain tactics covered (+${critCovered.length} pts)`,
+  ];
+  let tail = '';
+  if(critMissing.length) tail += ` Missing critical tactics: ${critMissing.join(', ')} — gaps here mean the kill chain has unmonitored steps.`;
+  if(noi.length) tail += ` Off-profile picks: ${noi.map(t=>t.id).join(', ')} — unrelated to the actor profile.`;
+  return parts.join(' · ') + '.' + tail;
+}
+function detectionExplanation(s){
+  const ttps = s.ttps.map(id=>TTPS.find(x=>x.id===id)).filter(Boolean);
+  let aligned = 0, irrelevant = 0, unmapped = 0;
+  const credit = WEIGHTS.detection / Math.max(1, ttps.length);
+  ttps.forEach(t=>{
+    const techIds = s.detectionMap[t.id] || [];
+    if(techIds.length === 0){ unmapped++; return; }
+    const techs = techIds.map(id=>DETECTIONS.find(d=>d.id===id)).filter(Boolean);
+    if(techs.some(d => d.covers.includes(t.tactic))) aligned++;
+    if(techs.some(d => d.covers.length === 0)) irrelevant++;
+  });
+  const parts = [
+    `${aligned}/${ttps.length} TTPs mapped to a tactic-aligned detection (+${(aligned*credit).toFixed(1)} pts at ${credit.toFixed(1)}/match)`,
+  ];
+  if(unmapped) parts.push(`${unmapped} TTP${unmapped>1?'s':''} with no detection mapped — also triggers a cross-section coverage-gap penalty`);
+  if(irrelevant) parts.push(`${irrelevant} red-herring detection${irrelevant>1?'s':''} mapped (e.g. Mainframe Audit, OT/ICS) (−${irrelevant} pts)`);
+  let tail = ` Available detection pool was filtered to what your Section 05 sensors actually deploy — gaps here often trace back to a missing sensor.`;
+  return parts.join(' · ') + '.' + tail;
+}
+
+const PENALTY_DETAIL = {
+  cloud_role_gap: {
+    why: 'You picked one or more cloud-domain TTPs (e.g. T1078.004 Cloud Accounts, T1098.x Cloud Roles) but no Cloud Sec Engineer (RL5) is on the team. Cloud TTPs require specialist knowledge of identity providers, IAM scopes, audit pipelines and consent flows — your engineering bench cannot model that without the role.',
+    impact: 'The team can simulate the action but cannot adequately validate or detect it without specialist coverage. Cloud findings end up either skipped or reported with low confidence, which is the same as not running them.',
+    fix: 'Hire RL5 (Cloud Sec Engineer) in Section 04, or drop the cloud TTPs in favor of on-prem analogues that the existing team can validate (e.g. swap T1078.004 → T1078 Valid Accounts on-prem).',
+  },
+  cti_role_gap: {
+    why: 'You picked one or more TTPs flagged as CTI-dependent (e.g. T1656 Impersonation, T1071.004 DNS Tunneling, T1078.004 Cloud Accounts, T1098.003 Add Roles to Cloud App). These rely on continuously-updated actor attribution, IoCs, and tradecraft-drift signals that only a CTI Analyst (RL4) can keep current during the engagement.',
+    impact: 'Without the CTI Analyst, the team picks the TTP off a stale brief and cannot adapt mid-engagement when the actor pivots. The "purple" half of the loop loses its intel feedback channel: detections may catch the technique but the team cannot tie it back to actor intent or campaign telemetry.',
+    fix: 'Hire RL4 (CTI Analyst) in Section 04, or swap the CTI-dependent TTPs for ones where the actor mapping is locked at planning time (e.g. T1059.001 PowerShell, T1003.001 LSASS Dump).',
+  },
+  roe_viol: {
+    why: 'A picked TTP performs destructive actions (e.g. T1486 Data Encrypted for Impact, T1485 Data Destruction). This violates the RoE clause "No production impact / destructive actions" — a required clause every responsible engagement signs.',
+    impact: 'The execution would be aborted by the engagement coordinator on contract review. Even if it slipped through, an actual destructive run would expose the org and the testing team to civil and regulatory liability.',
+    fix: 'Remove the destructive TTP and pick an emulation-safe alternative (e.g. T1567.002 Exfil to Cloud Storage produces the same kill chain stage without harm).',
+  },
+  ttp_budget: {
+    why: 'Combined licensing/tooling cost of the picked TTPs exceeds the $30K ceiling for the engagement. Each TTP carries a `cost` field that approximates the licenses, infrastructure, or specialist tooling it needs.',
+    impact: 'The engagement would require unplanned procurement, delaying execution by weeks and likely missing the 5-day window mandated in the objective.',
+    fix: 'Swap a high-cost TTP for a cheaper equivalent (e.g. drop T1495 Firmware Corruption — $5K — for a 0-cost process-execution TTP).',
+  },
+  cov_gap: {
+    why: 'A picked TTP has no detection technology mapped that aligns with its ATT&CK tactic. Either you mapped 0 detections, or the ones you mapped do not cover that tactic (e.g. mapping AD Audit to a C2 tactic).',
+    impact: 'The engagement would execute the TTP but the SOC has no way to observe it. Detection validation fails for that step of the kill chain, which is the entire reason purple team exists.',
+    fix: 'In Section 07, map at least one tactic-aligned detection per TTP. If no such detection appears in the filtered pool, go back to Section 05 and deploy the prerequisite sensor (e.g. add a Network IDS to enable C2 detections).',
+  },
+};
+
+// Per-TTP narrative — why does this technique align or diverge from Crimson Viper?
+const TTP_REASONS = {
+  // Crimson Viper observed
+  'T1566.001': 'Documented CV entry vector — macro-laden Office attachments to NOVA finance/IT inboxes.',
+  'T1078':     'Credential reuse from prior NOVA breach data; CV is observed using non-MFA accounts as primary entry.',
+  'T1078.004': 'CV drift toward cloud identity — observed using Entra consent grants in two recent campaigns. CTI-dependent.',
+  'T1656':     'CV operator persona impersonation observed in two campaigns (LinkedIn pretexting + finance-team spoofing). CTI-dependent.',
+  'T1059.001': 'CV default execution layer — living-off-the-land via PowerShell rather than custom binaries.',
+  'T1218.011': 'CV uses Rundll32 to load malicious DLLs while evading process-name-based detection.',
+  'T1068':     'Local privilege escalation typical of CV mid-engagement — exploits unpatched local services.',
+  'T1558.003': 'CV-standard AD credential access — Kerberoast service accounts with weak SPNs.',
+  'T1003.001': 'CV credential extraction technique post-PrivEsc — LSASS dump for hash harvesting.',
+  'T1087':     'CV reconnaissance step pre-lateral movement — enumerate domain accounts.',
+  'T1071.001': 'CV C2 channel observed — beaconing over HTTPS to staged commodity infrastructure.',
+  'T1021.002': 'CV lateral movement across NOVA hybrid AD using existing admin shares.',
+  'T1098.003': 'CV drift technique — adds OAuth/Entra roles to maintain post-eviction access. CTI-dependent.',
+  'T1567.002': 'CV exfil pattern — staged uploads to Mega/Dropbox/SharePoint OneDrive endpoints.',
+  // Other actors — overlap with CV but signature is wrong
+  'T1190':     'FIN7-style — relies on web-app vulnerabilities. CV prefers credential reuse and phishing, not Internet-facing exploits.',
+  'T1133':     'APT29/SVR-style — pivots through VPNs and remote services. CV is not observed using this entry path.',
+  'T1486':     'Ransomware-actor signature. CV is a financially-motivated infostealer; encryption-for-ransom is not in their playbook.',
+  'T1485':     'Wiper-actor signature (Sandworm/IRGC-style). CV preserves data for downstream resale, not destruction.',
+  'T1027':     'Generic across many actors. Not a CV-specific marker — burns a slot without strengthening the actor fit.',
+  'T1110.003': 'APT28-style — brute-force at scale. CV uses AiTM-stolen credentials, which is a finer signal than spray-and-pray.',
+  'T1505.003': 'China-nexus actor signature. CV does not deploy web shells; their post-exploitation lives off PowerShell.',
+  'T1098.001': 'APT39-style — service-principal cred theft. Overlaps slightly with CV cloud drift but the signature is distinct.',
+  'T1546.003': 'Common across APTs but not a CV-specific marker. WMI persistence burns a slot for marginal actor-fit.',
+  'T1071.004': 'APT39-style — DNS tunneling. CV uses HTTPS C2, not DNS. CTI-dependent.',
+  'T1090.003': 'Tor-style multi-hop infrastructure. CV uses commodity VPS hosts, not anonymizing chains.',
+  // Noise / off-profile (wrong OS/platform/scope)
+  'T1037.001': 'Persistence mechanism rare in modern AD; CV uses scheduled tasks and registry run keys instead.',
+  'T1611':     'Container/K8s escape. CV operates in AD/M365 — NOVA does not run a container fleet in the engagement scope.',
+  'T1548.005': 'Linux privilege escalation. CV exclusively targets Windows + Azure in observed campaigns.',
+  'T1546.014': 'macOS persistence. NOVA fleet is Windows; macOS is out of scope.',
+  'T1422':     'Mobile/Android technique. Not applicable to NOVA endpoints.',
+  'T1495':     'Firmware-level destruction. Outside fintech threat model and outside the lab tooling.',
+};
+function ttpReason(t){
+  return TTP_REASONS[t.id] || (t.tag==='observed' ? 'Aligned with Crimson Viper TTP set.' :
+                               t.tag==='other'    ? 'Belongs to a different actor profile.' :
+                                                    'Off-profile for the actor and the environment.');
+}
+
+function bracket(score){
+  if(score >= 90) return {label:'Tight, coherent, ready for sign-off', cls:'ok'};
+  if(score >= 70) return {label:'Sound but with 1–2 misalignments — revisit one section', cls:'warn'};
+  if(score >= 50) return {label:'Multiple sections diverge — needs a second pass', cls:'warn'};
+  return {label:'Plan would not survive contact with Crimson Viper', cls:'bad'};
+}
+
+// Top-of-scorecard narrative: turn the numeric result into a paragraph that explains
+// *why* the score landed where it did and *what to do next*.
+function scorecardNarrative(result){
+  const lines = [];
+  // Best section (highest ratio earned vs weight)
+  const ratios = Object.entries(result.sec).map(([k,v]) => ({k, v, max:WEIGHTS[k], r:v/WEIGHTS[k]}));
+  ratios.sort((a,b)=>b.r-a.r);
+  const strongest = ratios[0];
+  const weakest   = ratios[ratios.length-1];
+  const SECTION_LABEL = {objective:'Objective', roe:'RoE', roles:'Roles', environment:'Environment', ttps:'TTPs', detection:'Detection'};
+  if(strongest.r >= 0.9) lines.push(`Strongest section: ${SECTION_LABEL[strongest.k]} (${strongest.v.toFixed(1)}/${strongest.max}). Anchor your plan here on rerun.`);
+  if(weakest.r < 0.5)    lines.push(`Weakest section: ${SECTION_LABEL[weakest.k]} (${weakest.v.toFixed(1)}/${weakest.max}). This is the highest-leverage retry.`);
+  // Penalty narrative
+  if(result.penalties.length === 0){
+    lines.push('No cross-section penalties: your decisions in one section did not invalidate decisions in another. That is the harder half of this lab.');
+  } else {
+    const total = result.penTotal;
+    const penKeys = result.penalties.map(p=>p.key);
+    lines.push(`Cross-section penalties: −${total} pts across ${result.penalties.length} coupling${result.penalties.length>1?'s':''}. The biggest leverage on rerun is fixing the upstream choice (in Roles or Environment) instead of dropping the downstream TTP.`);
+    if(penKeys.includes('roe_viol')) lines.push('A destructive TTP slipped past the RoE: that single penalty is worth more than picking 2–3 noise TTPs combined. Always vet TTP picks against your required RoE clauses first.');
+  }
+  // Inject narrative
+  if(result.injectPts > 0)      lines.push(`Injects net +${result.injectPts}: you adapted to the curveballs without over-correcting.`);
+  else if(result.injectPts < 0) lines.push(`Injects net ${result.injectPts}: at least one curveball response cost you. Re-read the inject body — the highest-scoring option is rarely the most cautious one, but it is always the one that holds the engagement to its objective.`);
+  return lines.join(' ');
+}
+
+// Inject reasoning: explain why each option scored what it did.
+function injectVerdict(opt){
+  if(opt.score >= 5)      return 'Best response — adapts the plan without breaking objective or budget.';
+  if(opt.score >= 3)      return 'Good response — keeps the engagement on track with minor cost.';
+  if(opt.score === 0)     return 'Neutral — no progress, no harm, but a missed opportunity to strengthen the plan.';
+  if(opt.score >= -3)     return 'Weak — minor over-correction or missed adjustment.';
+  if(opt.score >= -5)     return 'Wrong direction — escalates fragility instead of resolving it.';
+  return 'Incorrect — would break the engagement (legal, scope, or capability collapse).';
+}
+
+/* ===== SECTION 8 — SCORE ===== */
+function renderScore(){
+  const result = computeScore(state);
+  const z = el('div',{cls:'scorecard full'});
+
+  const head = el('div',{attrs:{style:'display:flex;flex-direction:column;gap:6px'}});
+  head.appendChild(el('span',{cls:'crest-id', text:'Section 09 · Profile Analysis'}));
+  head.appendChild(el('h1',{text:'How your decisions interlocked.', attrs:{style:'font-family:var(--display);font-weight:800;font-size:42px;letter-spacing:-.03em;line-height:1'}}));
+  z.appendChild(head);
+
+  // Final score banner
+  const finalBox = el('div',{cls:'score-final'});
+  const lbl = el('div');
+  lbl.appendChild(el('div',{cls:'lbl', text:'Lab 1.1 · Final Intel Fit'}));
+  const br = bracket(result.final);
+  lbl.appendChild(el('h3',{text:br.label}));
+  finalBox.appendChild(lbl);
+  const sb = el('div',{cls:'score-bar'});
+  const sbT = el('div',{cls:'score-bar-track'});
+  const sbF = el('div',{cls:'score-bar-fill'}); sbF.style.width = result.final + '%';
+  sbT.appendChild(sbF); sb.appendChild(sbT);
+  finalBox.appendChild(sb);
+  const num = el('div',{cls:'num'});
+  num.appendChild(el('span',{text:String(result.final).padStart(2,'0')}));
+  num.appendChild(el('small',{text:'/100'}));
+  finalBox.appendChild(num);
+  z.appendChild(finalBox);
+
+  // Narrative summary — what your decisions did, where the leverage is on rerun
+  const nar = el('div',{cls:'bd-pen-card', attrs:{style:'background:var(--paper-2)'}});
+  const narH = el('div',{cls:'bd-pen-head'});
+  narH.appendChild(el('div',{cls:'name', text:'How to read this scorecard'}));
+  nar.appendChild(narH);
+  const narG = el('div',{cls:'bd-pen-grid'});
+  narG.appendChild(el('div',{cls:'lbl', text:'Summary'}));
+  narG.appendChild(el('div',{cls:'val', text: scorecardNarrative(result)}));
+  nar.appendChild(narG);
+  z.appendChild(nar);
+
+  // Per-section breakdown
+  z.appendChild(el('div',{cls:'bd-section', text:'Per-section breakdown'}));
+  const SECT_DEF = [
+    ['objective','Objective',    WEIGHTS.objective, objectiveExplanation],
+    ['roe','RoE',                WEIGHTS.roe,         roeExplanation],
+    ['roles','Roles',            WEIGHTS.roles,       rolesExplanation],
+    ['environment','Environment',WEIGHTS.environment, envExplanation],
+    ['ttps','TTPs',              WEIGHTS.ttps,        ttpsExplanation],
+    ['detection','Detection',    WEIGHTS.detection,   detectionExplanation],
+  ];
+  SECT_DEF.forEach(([k, label, max, explain])=>{
+    const card = el('div',{cls:'bd-pen-card'});
+    const h = el('div',{cls:'bd-pen-head'});
+    h.appendChild(el('div',{cls:'name', text: `${label}  ·  ${result.sec[k].toFixed(1)} of ${max}`}));
+    const ratio = result.sec[k]/max;
+    const ptsCls = ratio >= 0.8 ? 'ok' : '';
+    h.appendChild(el('div',{cls:'pts ' + ptsCls, text: result.sec[k].toFixed(1)}));
+    card.appendChild(h);
+    const grid = el('div',{cls:'bd-pen-grid'});
+    grid.appendChild(el('div',{cls:'lbl', text:'Why'}));
+    grid.appendChild(el('div',{cls:'val', text: explain(state)}));
+    card.appendChild(grid);
+    z.appendChild(card);
+  });
+
+  // Subtotal
+  const subRow = el('div',{cls:'bd-pen-card', attrs:{style:'background:var(--paper-2)'}});
+  const subH = el('div',{cls:'bd-pen-head'});
+  subH.appendChild(el('div',{cls:'name', text:'Subtotal · before cross-section penalties'}));
+  subH.appendChild(el('div',{cls:'pts', attrs:{style:'color:var(--ink)'}, text: result.subtotal.toFixed(1)}));
+  subRow.appendChild(subH);
+  z.appendChild(subRow);
+
+  // Cross-section penalties
+  if(result.penalties.length === 0){
+    const card = el('div',{cls:'bd-pen-card'});
+    const h = el('div',{cls:'bd-pen-head'});
+    h.appendChild(el('div',{cls:'name', text:'Cross-section penalties · none'}));
+    h.appendChild(el('div',{cls:'pts ok', text:'0'}));
+    card.appendChild(h);
+    const grid = el('div',{cls:'bd-pen-grid'});
+    grid.appendChild(el('div',{cls:'lbl', text:'Why'}));
+    grid.appendChild(el('div',{cls:'val', text:'All sections coherent. No decisions in one section invalidated decisions in another.'}));
+    card.appendChild(grid);
+    z.appendChild(card);
+  } else {
+    z.appendChild(el('div',{cls:'bd-section', text:'Cross-section penalties'}));
+    result.penalties.forEach(p=>{
+      const detail = PENALTY_DETAIL[p.key] || {why:'', impact:'', fix:''};
+      const card = el('div',{cls:'bd-pen-card'});
+      const h = el('div',{cls:'bd-pen-head'});
+      h.appendChild(el('div',{cls:'name', text:`${p.label}  ·  ${p.count} × −${p.perItem}`}));
+      h.appendChild(el('div',{cls:'pts', text:'−' + (p.count*p.perItem)}));
+      card.appendChild(h);
+      const grid = el('div',{cls:'bd-pen-grid'});
+      grid.appendChild(el('div',{cls:'lbl', text:'Why'}));
+      grid.appendChild(el('div',{cls:'val', text: detail.why}));
+      grid.appendChild(el('div',{cls:'lbl', text:'Impact'}));
+      grid.appendChild(el('div',{cls:'val', text: detail.impact}));
+      grid.appendChild(el('div',{cls:'lbl', text:'Fix'}));
+      grid.appendChild(el('div',{cls:'val', text: detail.fix}));
+      card.appendChild(grid);
+      z.appendChild(card);
+    });
+    const totRow = el('div',{cls:'bd-pen-card', attrs:{style:'background:var(--red-soft)'}});
+    const totH = el('div',{cls:'bd-pen-head'});
+    totH.appendChild(el('div',{cls:'name', text:'Total deductions'}));
+    totH.appendChild(el('div',{cls:'pts', text:'−' + result.penTotal}));
+    totRow.appendChild(totH);
+    z.appendChild(totRow);
+  }
+
+  // Injects
+  if(state.injectQueue.length > 0){
+    z.appendChild(el('div',{cls:'bd-section', text:'Injects · curveballs and your responses'}));
+    state.injectQueue.forEach(injId=>{
+      const i = INJECTS.find(x=>x.id===injId); if(!i) return;
+      const optId = state.injectsResponded[injId];
+      const opt = optId ? i.options.find(o=>o.id===optId) : null;
+      const card = el('div',{cls:'bd-pen-card'});
+      const h = el('div',{cls:'bd-pen-head'});
+      h.appendChild(el('div',{cls:'name', text:i.title}));
+      const sev = opt && opt.score > 0 ? 'ok' : '';
+      h.appendChild(el('div',{cls:'pts ' + sev, text: opt ? (opt.score>=0?'+':'') + opt.score : '—'}));
+      card.appendChild(h);
+      const grid = el('div',{cls:'bd-pen-grid'});
+      grid.appendChild(el('div',{cls:'lbl', text:'Curveball'}));
+      grid.appendChild(el('div',{cls:'val', text: i.body}));
+      grid.appendChild(el('div',{cls:'lbl', text:'You picked'}));
+      grid.appendChild(el('div',{cls:'val', text: opt ? opt.label : '(unresolved)'}));
+      if(opt){
+        grid.appendChild(el('div',{cls:'lbl', text:'Verdict'}));
+        grid.appendChild(el('div',{cls:'val', text: injectVerdict(opt) + ' (' + (opt.score>=0?'+':'') + opt.score + ' pts)'}));
+      }
+      card.appendChild(grid);
+      z.appendChild(card);
+    });
+    const totRow = el('div',{cls:'bd-pen-card', attrs:{style:'background:var(--paper-2)'}});
+    const totH = el('div',{cls:'bd-pen-head'});
+    totH.appendChild(el('div',{cls:'name', text:'Inject net effect · added to subtotal before penalties'}));
+    const cls = result.injectPts > 0 ? 'ok' : result.injectPts < 0 ? '' : '';
+    totH.appendChild(el('div',{cls:'pts ' + cls, attrs:{style: result.injectPts >= 0 ? 'color:var(--green)' : 'color:var(--red)'}, text:(result.injectPts>=0?'+':'') + result.injectPts}));
+    totRow.appendChild(totH);
+    z.appendChild(totRow);
+  }
+
+  // TTP alignment
+  z.appendChild(el('div',{cls:'bd-section', text:'TTP picks · alignment to actor profile'}));
+  const ttpsCard = el('div',{cls:'bd-card'});
+  state.ttps.forEach(id=>{
+    const t = TTPS.find(x=>x.id===id);
+    const r = el('div',{cls:'bd-row ttp-pick-row'});
+    // Top row: id + name + tag + badge
+    const top = el('div',{cls:'ttp-pick-head'});
+    top.appendChild(el('span',{cls:'k', text:`${t.id}  ${t.name}`}));
+    let badge, msg;
+    if(t.violates === 'roe'){ badge='bad'; msg='Violates RoE — destructive'; }
+    else if(t.tag === 'noise'){ badge='bad'; msg='Off-profile / noise'; }
+    else if(t.tag === 'other'){ badge='dev'; msg=`Reads as ${t.actor || 'other actor'}`; }
+    else { badge='ok'; msg='Crimson Viper observed'; }
+    top.appendChild(el('span',{cls:'meta', text:msg}));
+    top.appendChild(el('span',{cls:'badge ' + badge, text: badge==='ok'?'Aligned':badge==='dev'?'Diverged':'Off-profile'}));
+    r.appendChild(top);
+    // Reason line
+    r.appendChild(el('p',{cls:'ttp-pick-reason', text: ttpReason(t)}));
+    ttpsCard.appendChild(r);
+  });
+  z.appendChild(ttpsCard);
+
+  // Exports
+  z.appendChild(el('div',{cls:'bd-section', text:'Exports'}));
+  const ctrls = el('div',{attrs:{style:'display:flex;gap:10px;flex-wrap:wrap'}});
+  const dlBtn = el('button',{cls:'btn outline', text:'Export full plan as JSON'});
+  dlBtn.addEventListener('click', exportJson);
+  ctrls.appendChild(dlBtn);
+  const navBtn = el('button',{cls:'btn outline', text:'Export ATT&CK Navigator layer'});
+  navBtn.addEventListener('click', exportNavigatorLayer);
+  ctrls.appendChild(navBtn);
+  z.appendChild(ctrls);
+
+  $main.appendChild(z);
+}
+
+function downloadFile(filename, json){
+  const blob = new Blob([JSON.stringify(json, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 200);
+}
+function exportJson(){
+  downloadFile('lab-1.1-plan.json', { lab:'1.1', timestamp:new Date().toISOString(), state, score:computeScore(state) });
+}
+function exportNavigatorLayer(){
+  // ATT&CK Navigator layer schema (4.5) — compatible with mitre-attack/attack-navigator
+  const techniques = state.ttps.map(id=>{
+    const t = TTPS.find(x=>x.id===id);
+    if(!t) return null;
+    let score, comment;
+    if(t.violates === 'roe'){ score = 10;  comment = 'Picked but violates RoE — destructive'; }
+    else if(t.tag === 'noise'){ score = 25; comment = 'Off-profile / noise'; }
+    else if(t.tag === 'other'){ score = 50; comment = 'Diverged — reads as ' + (t.actor || 'other actor'); }
+    else                       { score = 100; comment = 'Crimson Viper observed — aligned'; }
+    return { techniqueID:id, score, color:'', comment, enabled:true, metadata:[], links:[], showSubtechniques:false };
+  }).filter(Boolean);
+
+  const layer = {
+    name: 'Lab 1.1 — Crimson Viper Engagement (NOVA Corp)',
+    versions: { attack:'19', navigator:'5.3.2', layer:'4.5' },
+    domain: 'enterprise-attack',
+    description: 'TTP loadout produced by the Lab 1.1 Engagement Planner. Score 100 = CV observed, 50 = other-actor, 25 = off-profile, 10 = RoE-violating.',
+    filters: { platforms:['Linux','macOS','Windows','Network','PRE','Containers','Office Suite','Identity Provider','SaaS','IaaS'] },
+    sorting: 0,
+    layout: { layout:'side', aggregateFunction:'average', showID:false, showName:true, showAggregateScores:false, countUnscored:false, expandedSubtechniques:'none' },
+    hideDisabled: false,
+    techniques,
+    gradient: { colors:['#ff6666ff','#ffe766ff','#8ec843ff'], minValue:0, maxValue:100 },
+    legendItems: [
+      {label:'Aligned (CV observed)',  color:'#8ec843ff'},
+      {label:'Diverged (other actor)', color:'#ffe766ff'},
+      {label:'Off-profile / RoE viol.', color:'#ff6666ff'},
+    ],
+    metadata: [],
+    links: [],
+    showTacticRowBackground: false,
+    tacticRowBackground: '#dddddd',
+    selectTechniquesAcrossTactics: true,
+    selectSubtechniquesWithParent: false,
+    selectVisibleTechniques: false,
+  };
+  downloadFile('lab-1.1-attack-navigator-layer.json', layer);
+}
+
+/* =====================================================================
+   INJECTS — selection, modal, action effects
+===================================================================== */
+function ensureInjectQueue(){
+  if(state.injectQueue && state.injectQueue.length > 0) return;
+  const ids = INJECTS.map(i => i.id);
+  // Fisher-Yates shuffle, take 3
+  for(let i = ids.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+  }
+  state.injectQueue = ids.slice(0, 3);
+  persist();
+}
+
+function pendingInjectFor(sectionKey){
+  return state.injectQueue
+    .map(id => INJECTS.find(i => i.id === id))
+    .filter(Boolean)
+    .find(inj => inj.triggerAfter === sectionKey && !state.injectsResponded[inj.id]);
+}
+
+function applyInjectAction(action, target){
+  if(action === 'add_roe'){
+    if(!state.roe.includes(target)){
+      if(state.roe.length >= 5) state.roe.shift();
+      state.roe.push(target);
+    }
+  } else if(action === 'add_role'){
+    if(!state.roles.includes(target)){
+      if(state.roles.length >= 6) state.roles.shift();
+      state.roles.push(target);
+    }
+  } else if(action === 'swap_in_ttp'){
+    if(!state.ttps.includes(target)){
+      // drop the lowest-value TTP first (noise > other > observed)
+      const order = id => {
+        const t = TTPS.find(x => x.id === id);
+        return t ? (t.tag === 'noise' ? 0 : t.tag === 'other' ? 1 : 2) : 99;
+      };
+      const sorted = [...state.ttps].sort((a,b) => order(a) - order(b));
+      if(sorted.length >= 6){
+        const drop = sorted[0];
+        state.ttps = state.ttps.filter(id => id !== drop);
+        delete state.detectionMap[drop];
+      }
+      state.ttps.push(target);
+    }
+  } else if(action === 'drop_env_sensor'){
+    const candidates = state.environment
+      .map(id => ENVIRONMENT_SENSORS.find(e => e.id === id))
+      .filter(s => s && !s.critical)
+      .sort((a,b) => b.cost - a.cost);
+    if(candidates.length > 0){
+      state.environment = state.environment.filter(id => id !== candidates[0].id);
+    }
+  }
+}
+
+let pendingNavStep = null;
+function showInjectModal(inj){
+  const modal = document.getElementById('imodal');
+  const card = modal.querySelector('.icard');
+  clear(card);
+  card.appendChild((() => {
+    const d = el('div',{cls:'ihead'});
+    d.appendChild(el('div',{cls:'ieyebrow', text:'Inject · Curveball during planning'}));
+    d.appendChild(el('div',{cls:'ititle', text:inj.title}));
+    return d;
+  })());
+  card.appendChild((() => {
+    const d = el('div',{cls:'ibody', text:inj.body});
+    return d;
+  })());
+  const opts = el('div',{cls:'iopts'});
+  inj.options.forEach(o => {
+    const b = el('button',{cls:'iopt', text:o.label});
+    b.addEventListener('click', ()=>{
+      state.injectsResponded[inj.id] = o.id;
+      if(o.action) applyInjectAction(o.action, o.target);
+      persist();
+      modal.classList.remove('open');
+      // proceed with the deferred nav advance
+      if(pendingNavStep !== null){
+        state.step = pendingNavStep;
+        pendingNavStep = null;
+        persist();
+        renderAll();
+      } else {
+        renderAll();
+      }
+      toast({title:'Inject resolved', em:inj.title.split(' · ')[0], body:' — choice recorded silently.'});
+    });
+    opts.appendChild(b);
+  });
+  card.appendChild(opts);
+  modal.classList.add('open');
+}
+
+/* =====================================================================
+   NAV
+===================================================================== */
+function canAdvance(){
+  switch(state.step){
+    case 0: return true;
+    case 1: return !!state.objective;
+    case 2: return state.roe.length === 5;
+    case 3: return state.roles.length >= 4 && state.roles.length <= 6;
+    case 4: return state.environment.length >= 4;
+    case 5: return state.ttps.length === 6;
+    case 6: return state.ttps.every(id => (state.detectionMap[id] || []).length > 0);
+    case 7: return true;  // Review screen — always advancable
+    case 8: return true;  // Score — Restart action
+    default: return false;
+  }
+}
+
+function updateNextButton(){
+  $btnNext.disabled = !canAdvance();
+}
+
+$btnNext.addEventListener('click', ()=>{
+  if(state.step === STEPS.length - 1){
+    // Restart — re-roll injects too
+    if(confirm('Restart the lab? All picks will be cleared.')){
+      state = initialState();
+      ensureInjectQueue();
+      persist(); renderAll();
+    }
+    return;
+  }
+  if(!canAdvance()) return;
+  // Section just completed has key STEPS[state.step].key
+  const completed = STEPS[state.step].key;
+  const inj = pendingInjectFor(completed);
+  if(inj){
+    pendingNavStep = state.step + 1;
+    showInjectModal(inj);
+    return;
+  }
+  state.step++;
+  persist();
+  renderAll();
+});
+$btnBack.addEventListener('click', ()=>{
+  if(state.step === 0) return;
+  state.step--;
+  persist();
+  renderAll();
+});
+
+function renderAll(){
+  renderPath();
+  renderGauge();
+  renderConstraintsBand();
+  renderSection();
+  updateNextButton();
+}
+
+/* =====================================================================
+   RESET — confirm modal then wipe localStorage and re-init
+===================================================================== */
+function showResetModal(){
+  const modal = document.getElementById('imodal');
+  const card = modal.querySelector('.icard');
+  clear(card);
+  const head = el('div',{cls:'ihead'});
+  head.appendChild(el('div',{cls:'ieyebrow', text:'Reset · Clear all progress'}));
+  head.appendChild(el('div',{cls:'ititle', text:'Restart the lab from the beginning?'}));
+  card.appendChild(head);
+  const body = el('div',{cls:'ibody'});
+  body.appendChild(document.createTextNode('All your picks will be cleared: '));
+  const emTag = document.createElement('em');
+  emTag.textContent = 'objective, RoE, roles, environment, TTPs, detection mappings';
+  body.appendChild(emTag);
+  body.appendChild(document.createTextNode(', plus the inject queue and any answers given. The Intel Fit gauge resets to zero. '));
+  const strong = document.createElement('strong');
+  strong.textContent = 'This action cannot be undone.';
+  body.appendChild(strong);
+  card.appendChild(body);
+  const opts = el('div',{cls:'iopts'});
+  const cancel = el('button',{cls:'iopt', text:'Cancel — keep my progress'});
+  cancel.addEventListener('click', ()=>{ modal.classList.remove('open'); });
+  const confirmBtn = el('button',{cls:'iopt danger', text:'Reset — clear everything and start over'});
+  confirmBtn.addEventListener('click', ()=>{
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+    state = initialState();
+    pendingNavStep = null;
+    ensureInjectQueue();
+    persist();
+    modal.classList.remove('open');
+    renderAll();
+    toast({title:'Lab reset', em:'Briefing', body:' — progress cleared. Starting over.'});
+  });
+  opts.appendChild(cancel);
+  opts.appendChild(confirmBtn);
+  card.appendChild(opts);
+  modal.classList.add('open');
+}
+document.getElementById('btn-reset').addEventListener('click', showResetModal);
+
+ensureInjectQueue();
+renderAll();
+
+// Test hook (read-only) — used by automated test runner
+window.__lab = {
+  get state(){ return state; },
+  computeScore: () => computeScore(state),
+  scoreFor: (s) => computeScore(s),
+  data: { TTPS, INJECTS, ROE_CLAUSES, ROLES_POOL, ENVIRONMENT_SENSORS, DETECTIONS, OBJECTIVES },
+};
+</script>
+</body>
+</html>
