@@ -1,0 +1,41 @@
+# Sigma correlation rule (modern syntax) — the legacy `count() by ... > 5` pipe
+# expression is deprecated in pySigma 3.x. Correlation rules split into two docs
+# separated by `---`: (1) the base event selector, (2) the correlation logic.
+---
+title: Windows Failed Logon (base)
+id: 7c383eba-561a-4a67-b21f-ca7a10e38a73
+status: experimental
+description: Base event — single failed-logon record (Security EID 4625).
+references:
+  - https://attack.mitre.org/techniques/T1110/
+author: JawaSec Purple Team — APT2026 Lab 4.3
+date: 2026/05/20
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+  condition: selection
+level: informational
+---
+title: Windows Failed Logon Brute Force
+id: 7c383eba-561a-4a67-b21f-ca7a10e38a74
+status: experimental
+description: |
+  Detects more than 5 failed logon events (4625) for the same TargetUserName
+  from the same WorkstationName within a 10-minute window.
+correlation:
+  type: event_count
+  rules:
+    - 7c383eba-561a-4a67-b21f-ca7a10e38a73
+  group-by:
+    - TargetUserName
+    - WorkstationName
+  timespan: 10m
+  condition:
+    gt: 5
+tags:
+  - attack.credential_access
+  - attack.t1110
+level: medium

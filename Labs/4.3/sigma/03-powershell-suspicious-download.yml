@@ -1,0 +1,36 @@
+title: PowerShell Suspicious Download Cradle
+id: 9f3d7d28-b35a-4d77-9be1-77f43d2b1f55
+status: experimental
+description: |
+  Detects PowerShell script blocks containing common download cradle keywords
+  (DownloadString, DownloadFile, Invoke-WebRequest, Start-BitsTransfer, WebClient,
+  Net.WebClient, iwr, curl, wget) — typical of T1059.001 + T1105 stagers.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+  - https://attack.mitre.org/techniques/T1105/
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.command_and_control
+  - attack.t1105
+author: JawaSec Purple Team — APT2026 Lab 4.3
+date: 2026/05/20
+logsource:
+  product: windows
+  category: ps_script
+detection:
+  selection_keyword:
+    ScriptBlockText|contains:
+      - 'DownloadString'
+      - 'DownloadFile'
+      - 'DownloadData'
+      - 'Invoke-WebRequest'
+      - 'Start-BitsTransfer'
+      - 'Net.WebClient'
+      - 'WebClient'
+  filter_sys:
+    UserId|contains: 'SYSTEM'
+  condition: selection_keyword and not filter_sys
+falsepositives:
+  - Legitimate admin tooling using Invoke-WebRequest for internal downloads
+level: medium

@@ -1,0 +1,45 @@
+title: LSASS Memory Access from Non-System Account (IoA)
+id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
+status: experimental
+description: |
+  Detects when a process accesses LSASS memory with specific GrantedAccess masks
+  indicative of credential dumping (T1003.001). Filters legitimate SYSTEM processes
+  and the Elastic Agent / Defender stack used in the NOVA lab environment.
+references:
+  - https://attack.mitre.org/techniques/T1003/001/
+  - https://github.com/SigmaHQ/sigma/blob/master/rules/windows/process_access/proc_access_win_lsass_dump.yml
+tags:
+  - attack.credential_access
+  - attack.t1003.001
+author: JawaSec Purple Team — APT2026 Lab 4.3
+date: 2026/05/20
+logsource:
+  product: windows
+  category: process_access
+detection:
+  selection:
+    TargetImage|endswith: '\lsass.exe'
+    GrantedAccess:
+      - '0x1010'
+      - '0x1410'
+      - '0x143A'
+      - '0x1438'
+      - '0x1000'
+      - '0x1FFFFF'
+      - '0x1F3FFF'   # Server SKU PROCESS_ALL_ACCESS variant (Server 2016/2019)
+  filter_system:
+    SourceImage|endswith:
+      - '\wininit.exe'
+      - '\services.exe'
+      - '\lsm.exe'
+      - '\csrss.exe'
+      - '\smss.exe'
+  filter_defender:
+    SourceImage|startswith:
+      - 'C:\Program Files\Windows Defender\'
+      - 'C:\ProgramData\Microsoft\Windows Defender\'
+      - 'C:\Program Files\Elastic\'
+  condition: selection and not 1 of filter_*
+falsepositives:
+  - Endpoint security products not in the filter list (add as discovered)
+level: high
