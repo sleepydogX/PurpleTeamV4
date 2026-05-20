@@ -19,14 +19,19 @@ logsource:
 detection:
   selection:
     TargetImage|endswith: '\lsass.exe'
+    # Sysmon writes GrantedAccess as a lowercase hex string. Lucene exact-match
+    # is case-sensitive, so include lowercase forms.
     GrantedAccess:
       - '0x1010'
       - '0x1410'
       - '0x143A'
+      - '0x143a'
       - '0x1438'
       - '0x1000'
       - '0x1FFFFF'
-      - '0x1F3FFF'   # Server SKU PROCESS_ALL_ACCESS variant (Server 2016/2019)
+      - '0x1fffff'
+      - '0x1F3FFF'
+      - '0x1f3fff'   # Server SKU PROCESS_ALL_ACCESS
   filter_system:
     SourceImage|endswith:
       - '\wininit.exe'
